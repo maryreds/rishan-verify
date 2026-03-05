@@ -57,21 +57,21 @@ export default function Home() {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full mb-6">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-xs font-medium text-slate-300">Trusted by recruiters nationwide</span>
+              <span className="text-xs font-medium text-slate-300">Recognized by top recruiters nationwide</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]">
-              Prove you&apos;re real.
+              Your skills are real.
               <br />
               <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-blue-400 bg-clip-text text-transparent">
-                Stand out from the fakes.
+                Now prove it.
               </span>
             </h1>
 
             <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-lg">
-              The staffing industry is flooded with fake candidates and fabricated
-              resumes. Get a verified badge that proves your identity and work
-              authorization — trusted by employers everywhere.
+              Don&apos;t let your resume get lost in a sea of automated applications.
+              Earn a free, recruiter-trusted badge that verifies your identity and
+              work authorization — instantly moving you to the top of the pile.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
@@ -79,7 +79,7 @@ export default function Home() {
                 href="/signup"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-violet-600 rounded-full hover:from-blue-500 hover:to-violet-500 transition-all shadow-xl shadow-blue-600/25"
               >
-                Get Verified — It&apos;s Free
+                Get Verified for Free
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
