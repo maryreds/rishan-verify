@@ -29,39 +29,35 @@ const demo = {
 
   pins: [
     {
-      label: "Identity\nVerified",
-      sublabel: "Gov. ID Checked",
-      bg: "bg-emerald-500",
-      ring: "ring-emerald-300",
-      shadow: "shadow-emerald-900/60",
-      rotate: "-rotate-3",
+      label: "IDENTITY\nVERIFIED",
+      sublabel: "GOV. ID CHECKED",
+      color: "#145a2e",
+      lightColor: "#22a050",
+      rotate: "-3deg",
       icon: "🪪",
     },
     {
-      label: "Work Auth\nCleared",
+      label: "WORK AUTH\nCLEARED",
       sublabel: "H-1B · CBP I-94",
-      bg: "bg-blue-500",
-      ring: "ring-blue-300",
-      shadow: "shadow-blue-900/60",
-      rotate: "rotate-2",
+      color: "#0f3d8a",
+      lightColor: "#1a6fd4",
+      rotate: "2deg",
       icon: "✅",
     },
     {
-      label: "Skills\nVerified",
-      sublabel: "8 of 10 confirmed",
-      bg: "bg-violet-500",
-      ring: "ring-violet-300",
-      shadow: "shadow-violet-900/60",
-      rotate: "-rotate-1",
+      label: "SKILLS\nVERIFIED",
+      sublabel: "8 OF 10 CONFIRMED",
+      color: "#5b1a9e",
+      lightColor: "#8b32d4",
+      rotate: "-1deg",
       icon: "⚡",
     },
     {
-      label: "Certs\nVerified",
-      sublabel: "AWS · Google Cloud",
-      bg: "bg-amber-500",
-      ring: "ring-amber-300",
-      shadow: "shadow-amber-900/60",
-      rotate: "rotate-3",
+      label: "CERTS\nVERIFIED",
+      sublabel: "AWS · GOOGLE CLOUD",
+      color: "#92400e",
+      lightColor: "#d97706",
+      rotate: "3deg",
       icon: "🏆",
     },
   ],
@@ -252,51 +248,123 @@ export default function BadgePreview() {
             <div className="absolute inset-0 rounded-3xl opacity-[0.03]"
               style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "20px 20px" }} />
 
-            <div className="relative flex flex-wrap gap-6 justify-center sm:justify-start">
+            <div className="relative flex flex-wrap gap-8 justify-center sm:justify-start items-end">
               {demo.pins.map((pin) => (
-                <div key={pin.label} className={`group flex flex-col items-center gap-2 ${pin.rotate} hover:rotate-0 transition-transform duration-300`}>
-                  {/* The pin itself */}
-                  <div className={`
-                    relative w-28 h-28 rounded-full flex flex-col items-center justify-center
-                    ${pin.bg} ring-4 ${pin.ring} ring-opacity-40
-                    shadow-2xl ${pin.shadow}
-                    cursor-pointer select-none
-                  `}
-                    style={{
-                      boxShadow: `
-                        0 0 0 2px rgba(255,255,255,0.15) inset,
-                        0 4px 24px rgba(0,0,0,0.5),
-                        0 1px 0 rgba(255,255,255,0.3) inset
-                      `
-                    }}
-                  >
-                    {/* Shine highlight */}
-                    <div className="absolute top-2 left-3 w-8 h-4 bg-white/20 rounded-full blur-sm rotate-[-30deg]" />
-                    {/* Rim shadow */}
-                    <div className="absolute inset-0 rounded-full ring-[6px] ring-black/20" />
+                <div
+                  key={pin.label}
+                  className="group flex flex-col items-center gap-2.5 transition-transform duration-300 hover:scale-105 cursor-pointer select-none"
+                  style={{ transform: `rotate(${pin.rotate})`, transformOrigin: "center bottom" }}
+                >
+                  {/* Pin clasp hardware */}
+                  <div style={{
+                    width: 14,
+                    height: 18,
+                    borderRadius: "3px 3px 0 0",
+                    background: "linear-gradient(180deg, #e8e0c0 0%, #c0a840 40%, #8a7420 100%)",
+                    boxShadow: "0 -1px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.5)",
+                    marginBottom: -4,
+                    position: "relative",
+                    zIndex: 10,
+                  }} />
 
-                    <span className="text-2xl mb-1 relative z-10">{pin.icon}</span>
-                    <p className="text-[11px] font-black text-white text-center leading-tight relative z-10 px-2 whitespace-pre-line">
-                      {pin.label}
-                    </p>
+                  {/* Gold rim — outer ring */}
+                  <div style={{
+                    width: 136,
+                    height: 136,
+                    borderRadius: "50%",
+                    background: "linear-gradient(145deg, #f5e070 0%, #d4a817 25%, #a07818 55%, #c89820 75%, #ecd040 100%)",
+                    padding: 10,
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)",
+                    flexShrink: 0,
+                  }}>
+                    {/* Enamel fill — inner circle */}
+                    <div style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      background: `radial-gradient(circle at 38% 28%, ${pin.lightColor} 0%, ${pin.color} 65%)`,
+                      boxShadow: "inset 0 4px 12px rgba(0,0,0,0.45), inset 0 -2px 6px rgba(255,255,255,0.08)",
+                      display: "flex",
+                      flexDirection: "column" as const,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 2,
+                      position: "relative" as const,
+                      overflow: "hidden",
+                    }}>
+                      {/* Enamel gloss highlight */}
+                      <div style={{
+                        position: "absolute",
+                        top: 8,
+                        left: 14,
+                        width: 36,
+                        height: 16,
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.18)",
+                        filter: "blur(4px)",
+                        transform: "rotate(-30deg)",
+                      }} />
+                      <span style={{ fontSize: 28, lineHeight: 1, position: "relative", zIndex: 1 }}>{pin.icon}</span>
+                      <p style={{
+                        fontSize: 11,
+                        fontWeight: 900,
+                        color: "white",
+                        textAlign: "center",
+                        lineHeight: 1.25,
+                        textTransform: "uppercase" as const,
+                        letterSpacing: "0.04em",
+                        padding: "0 10px",
+                        whiteSpace: "pre-line",
+                        textShadow: "0 1px 4px rgba(0,0,0,0.6)",
+                        position: "relative",
+                        zIndex: 1,
+                      }}>{pin.label}</p>
+                      <p style={{
+                        fontSize: 7.5,
+                        color: "rgba(255,255,255,0.65)",
+                        textAlign: "center",
+                        textTransform: "uppercase" as const,
+                        letterSpacing: "0.08em",
+                        position: "relative",
+                        zIndex: 1,
+                        padding: "0 8px",
+                      }}>{pin.sublabel}</p>
+                    </div>
                   </div>
-
-                  {/* Pin label below */}
-                  <p className="text-[10px] text-slate-500 text-center">{pin.sublabel}</p>
                 </div>
               ))}
 
-              {/* "Get yours" teaser pin */}
-              <div className="flex flex-col items-center gap-2 rotate-2 hover:rotate-0 transition-transform duration-300 opacity-50 hover:opacity-70">
-                <div className="w-28 h-28 rounded-full flex flex-col items-center justify-center border-4 border-dashed border-slate-600 cursor-pointer"
-                  style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}
-                >
-                  <span className="text-2xl mb-1">🔒</span>
-                  <p className="text-[11px] font-bold text-slate-500 text-center leading-tight px-2">
-                    More<br/>Coming
-                  </p>
+              {/* "More Coming" locked pin — gunmetal */}
+              <div
+                className="group flex flex-col items-center gap-2.5 transition-transform duration-300 hover:scale-105 cursor-pointer select-none opacity-45 hover:opacity-65"
+                style={{ transform: "rotate(2deg)", transformOrigin: "center bottom" }}
+              >
+                <div style={{
+                  width: 14, height: 18, borderRadius: "3px 3px 0 0",
+                  background: "linear-gradient(180deg, #aaa 0%, #666 40%, #333 100%)",
+                  boxShadow: "0 -1px 4px rgba(0,0,0,0.5)", marginBottom: -4, position: "relative", zIndex: 10,
+                }} />
+                <div style={{
+                  width: 136, height: 136, borderRadius: "50%",
+                  background: "linear-gradient(145deg, #888 0%, #555 30%, #333 60%, #555 80%, #777 100%)",
+                  padding: 10,
+                  boxShadow: "0 10px 40px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -3px 6px rgba(0,0,0,0.5)",
+                }}>
+                  <div style={{
+                    width: "100%", height: "100%", borderRadius: "50%",
+                    background: "radial-gradient(circle at 38% 28%, #4a5568 0%, #1a202c 65%)",
+                    boxShadow: "inset 0 4px 12px rgba(0,0,0,0.5)",
+                    display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", gap: 2,
+                  }}>
+                    <span style={{ fontSize: 28, lineHeight: 1 }}>🔒</span>
+                    <p style={{ fontSize: 11, fontWeight: 900, color: "rgba(255,255,255,0.5)", textAlign: "center", lineHeight: 1.25, textTransform: "uppercase" as const, letterSpacing: "0.04em", padding: "0 10px" }}>
+                      MORE{"\n"}COMING
+                    </p>
+                    <p style={{ fontSize: 7.5, color: "rgba(255,255,255,0.3)", textAlign: "center", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                      EARN MORE BADGES
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[10px] text-slate-600 text-center">Earn more badges</p>
               </div>
             </div>
           </div>
