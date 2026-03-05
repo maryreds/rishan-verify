@@ -25,6 +25,12 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/preview-badge"
+            className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
+          >
+            See Example
+          </Link>
+          <Link
             href="/login"
             className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
           >
