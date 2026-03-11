@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { WavyBackground } from "@/components/ui/wavy-background";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -16,7 +17,21 @@ const fadeUp = {
 
 export default function HeroSection() {
   return (
-    <section className="relative max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-20 lg:pt-20 lg:pb-32">
+    <WavyBackground
+      containerClassName="relative"
+      colors={[
+        "#22c55e",
+        "#10b981",
+        "#059669",
+        "#34d399",
+        "#6ee7b7",
+      ]}
+      waveWidth={50}
+      blur={12}
+      speed="slow"
+      waveOpacity={0.15}
+    >
+      <section className="relative max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-20 lg:pt-20 lg:pb-32">
       <div className="relative z-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         {/* Left: copy */}
         <div>
@@ -171,6 +186,7 @@ export default function HeroSection() {
           </div>
         </motion.div>
       </div>
-    </section>
+      </section>
+    </WavyBackground>
   );
 }
