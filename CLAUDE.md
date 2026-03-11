@@ -108,13 +108,13 @@ Raw colors defined as CSS custom properties in oklch format.
 - **Always use semantic classes**: `bg-background`, `text-foreground`, `bg-card`, `text-muted-foreground`, `border-border`, `bg-muted`
 - **Never use hardcoded grays** (`bg-white`, `text-gray-600`, `border-gray-100`) in dashboard/admin/auth pages
 - **Status colors are OK**: emerald for verified, amber for pending, red for rejected — these are intentional and include `dark:` variants
-- **Landing page is always dark**: Uses `bg-[#06060f]` directly, not theme tokens. The `bg-white/5` patterns are transparent overlays, not theme violations.
+- **Landing page**: Uses semantic tokens (`bg-background`, `text-foreground`, `bg-card`, `border-border`) — supports both light and dark modes via theme toggle.
 
 ---
 
 ## Theming Rules
 - **Dashboard, Admin, Auth pages**: Use semantic tokens, respect dark/light toggle
-- **Landing page**: Always dark (`bg-[#06060f] text-white`), independent of theme
+- **Landing page**: Uses semantic tokens, supports light/dark via tab toggle in nav
 - **Preview-badge page**: Always dark (same as landing)
 - **Public profile (`/v/[slug]`)**: Uses semantic tokens, supports dark/light
 - **ThemeProvider**: Wraps app in `layout.tsx`, default theme is "light", system detection enabled
@@ -122,17 +122,17 @@ Raw colors defined as CSS custom properties in oklch format.
 ---
 
 ## Design System (Visual)
-- **Landing background:** `#06060f` (near-black)
-- **Dark card bg:** `#0d0d1a`
-- **Accent:** blue-400 → violet-400 gradient for headlines
-- **Verified green:** `#22c55e` (emerald-500)
-- **Text hierarchy (dark):** white → slate-300 → slate-400 → slate-500 → slate-600
+- **Style:** Clean, editorial, light-first design (inspired by coaching program reference)
+- **Fonts:** DM Serif Display (headlines, `font-serif`), Inter (body, `font-sans`)
+- **Accent:** Emerald green `#22c55e` (emerald-500) — used for verified badges, headline accents, CTA highlights
+- **Landing palette:** Light mode = white bg, subtle gray borders, black text. Dark mode = #06060f bg, dark cards, white text.
+- **Theme toggle:** Segmented pill (Light | Dark) in nav bar, powered by next-themes
 
 ### Badge Card Pattern (used on landing hero + preview-badge)
-Full-bleed photo → dark gradient overlay (`to top`, heavy at bottom) → name + ✓ VERIFIED chip overlaid → Identity Verified frosted bar at bottom.
+Full-bleed photo → dark gradient overlay (`to top`, heavy at bottom) → name + VERIFIED chip overlaid.
 
 ### Floating Gallery
-Cards animate upward with `floatUp` keyframes. Each profile has `--rotate` and `--scale` CSS variables set as inline styles, consumed inside `@keyframes` via `var()`. This preserves per-card rotation during transform animation. Do NOT put both `animation` and `transform` on the same element directly — it breaks rotation.
+Horizontal scrollable row of profile cards with fade-edge gradients. Cards: `bg-card border-border`, photo + ShieldCheck VERIFIED badge + name/role.
 
 ### Enamel Pin Badges (preview-badge page)
 Two-layer approach: outer div (gold gradient + padding = rim) → inner div (radial gradient = enamel fill). Pin clasp is a small separate div with `marginBottom: -4`. Pins are 108px. Text inside uses `overflow: hidden` on the enamel div — keep sublabel `letterSpacing` ≤ 0.04em and `fontSize` ≤ 6px to avoid clipping at circle edges.
@@ -184,6 +184,8 @@ Current 14 profiles: Rachel Williams, Marcus Thompson, Aisha Davis, Jenny Liu, S
 |-----|-------------|
 | `v-pre-visual-upgrade` | Original MVP before visual upgrade |
 | `v1-visual-upgrade` | Phase 1: shadcn/ui, design tokens, dark mode, animations, loading states |
+| `v-pre-editorial-redesign` | Before editorial redesign (dark-only landing) |
+| `v2-editorial-redesign` | Phase 2: Clean editorial landing, light-first, DM Serif Display, theme toggle tab, all sections redesigned |
 
 ---
 

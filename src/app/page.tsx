@@ -10,16 +10,15 @@ import LandingFooter from "@/components/landing/landing-footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#06060f] text-white overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-hidden">
       <LandingNav />
       <HeroSection />
       <StatsBar />
 
-      {/* Floating Gallery */}
-      <section className="relative py-4">
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-64 bg-gradient-to-r from-blue-600/5 via-violet-600/8 to-emerald-600/5 blur-3xl pointer-events-none" />
-        <div className="text-center mb-2 relative z-10">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-600">
+      {/* Verified Professionals Gallery */}
+      <section className="relative py-16 lg:py-20">
+        <div className="text-center mb-10 relative z-10">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             500+ professionals verified and counting
           </p>
         </div>

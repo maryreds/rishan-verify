@@ -9,6 +9,9 @@
   --color-brand-green: #22c55e;
   --color-brand-gold: #d4a817;
 
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), "DM Serif Display", Georgia, serif;
+
   --radius-lg: 0.5rem;
   --radius-md: calc(var(--radius-lg) - 2px);
   --radius-sm: calc(var(--radius-lg) - 4px);

@@ -43,7 +43,7 @@ const stats = [
 
 export default function StatsBar() {
   return (
-    <section className="border-y border-white/5 bg-white/[0.02]">
+    <section className="border-y border-border bg-muted/50">
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
@@ -55,11 +55,11 @@ export default function StatsBar() {
               transition={{ delay: i * 0.1, duration: 0.5 }}
               className="text-center"
             >
-              <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
+              <p className="text-3xl font-bold text-foreground">
                 {stat.prefix}
                 <CountUp target={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="mt-1 text-sm text-slate-500">{stat.label}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
             </motion.div>
           ))}
         </div>

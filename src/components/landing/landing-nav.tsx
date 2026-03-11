@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 export default function LandingNav() {
   return (
@@ -12,26 +13,43 @@ export default function LandingNav() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="relative z-50 flex items-center justify-between px-6 lg:px-12 py-5 max-w-7xl mx-auto"
     >
-      <div className="flex items-center gap-2.5">
-        <ShieldCheck className="w-7 h-7 text-blue-400" />
-        <span className="text-lg font-bold tracking-tight">Rishan Verify</span>
-      </div>
+      {/* Logo */}
       <div className="flex items-center gap-2">
-        <Link
-          href="/preview-badge"
-          className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
-        >
-          See Example
-        </Link>
+        <ShieldCheck className="w-6 h-6 text-emerald-500" />
+        <span className="text-base font-semibold tracking-tight">
+          Rishan
+        </span>
+        <span className="text-muted-foreground/40 select-none">——</span>
+        <span className="text-base font-semibold tracking-tight">
+          Verify
+        </span>
+      </div>
+
+      {/* Center nav links */}
+      <div className="hidden md:flex items-center gap-8">
+        <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          Features
+        </a>
+        <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          How It Works
+        </a>
+        <a href="#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          Testimonials
+        </a>
+      </div>
+
+      {/* Right side */}
+      <div className="flex items-center gap-3">
+        <ThemeToggle />
         <Link
           href="/login"
-          className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
+          className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Log In
         </Link>
         <Link
           href="/signup"
-          className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-violet-600 rounded-full hover:from-blue-500 hover:to-violet-500 transition-all shadow-lg shadow-blue-600/20"
+          className="px-5 py-2.5 text-sm font-semibold text-white bg-foreground rounded-full hover:opacity-90 transition-all"
         >
           Get Verified
         </Link>
