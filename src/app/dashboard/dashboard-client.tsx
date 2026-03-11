@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ShieldCheck,
   Upload,
   FileText,
   Briefcase,
@@ -11,7 +10,6 @@ import {
   BadgeCheck,
   Clock,
   XCircle,
-  LogOut,
   Plus,
   Trash2,
   Camera,
@@ -19,9 +17,28 @@ import {
   Copy,
   Check,
   Share2,
+  Loader2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
+import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
+
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Profile {
   id: string;
@@ -83,7 +100,6 @@ export default function DashboardClient({
 }) {
   const router = useRouter();
   const supabase = createClient();
-  const [activeTab, setActiveTab] = useState<"profile" | "resume" | "verify">("profile");
   const [uploading, setUploading] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [experience, setExperience] = useState(initialExperience);
@@ -116,7 +132,6 @@ export default function DashboardClient({
     if (!profile) return;
     setGeneratingSlug(true);
 
-    // Generate slug from name: "John Doe" -> "john-doe-a1b2"
     const base = (profile.full_name || "candidate")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -139,6 +154,7 @@ export default function DashboardClient({
     if (publicUrl) {
       navigator.clipboard.writeText(publicUrl);
       setCopied(true);
+      toast.success("Link copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     }
   }
@@ -159,6 +175,9 @@ export default function DashboardClient({
       setExperience([data, ...experience]);
       setNewExp({ company: "", title: "", start_date: "", end_date: "", is_current: false, description: "" });
       setShowAddExp(false);
+      toast.success("Experience added");
+    } else if (error) {
+      toast.error("Failed to add experience", { description: error.message });
     }
     setAddingExp(false);
   }
@@ -178,13 +197,11 @@ export default function DashboardClient({
       setEducation([data, ...education]);
       setNewEdu({ institution: "", degree: "", field_of_study: "", start_date: "", end_date: "" });
       setShowAddEdu(false);
+      toast.success("Education added");
+    } else if (error) {
+      toast.error("Failed to add education", { description: error.message });
     }
     setAddingEdu(false);
-  }
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push("/");
   }
 
   async function handleResumeUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -199,7 +216,7 @@ export default function DashboardClient({
       .upload(filePath, file);
 
     if (uploadError) {
-      alert("Upload failed: " + uploadError.message);
+      toast.error("Upload failed", { description: uploadError.message });
       setUploading(false);
       return;
     }
@@ -264,10 +281,12 @@ export default function DashboardClient({
           }
         }
 
+        toast.success("Resume parsed successfully", { description: "Your profile has been updated with extracted data." });
         router.refresh();
       }
     } catch {
       console.error("Parse failed");
+      toast.error("Resume parsing failed", { description: "Please try again or fill in your profile manually." });
     }
 
     setParsing(false);
@@ -276,7 +295,7 @@ export default function DashboardClient({
 
   async function handleSaveProfile() {
     setSaving(true);
-    await supabase
+    const { error } = await supabase
       .from("profiles")
       .update({
         full_name: profileData.full_name,
@@ -288,6 +307,12 @@ export default function DashboardClient({
         domains: profileData.domains.split(",").map((s) => s.trim()).filter(Boolean),
       })
       .eq("id", user.id);
+
+    if (error) {
+      toast.error("Failed to save profile", { description: error.message });
+    } else {
+      toast.success("Profile saved successfully");
+    }
     setSaving(false);
   }
 
@@ -313,7 +338,7 @@ export default function DashboardClient({
       .upload(filePath, file);
 
     if (uploadError) {
-      alert("Upload failed: " + uploadError.message);
+      toast.error("Upload failed", { description: uploadError.message });
       setUploadingId(false);
       return;
     }
@@ -330,6 +355,7 @@ export default function DashboardClient({
       .eq("id", user.id);
 
     setUploadingId(false);
+    toast.success("Document uploaded", { description: "Your ID is now pending review." });
     router.refresh();
   }
 
@@ -338,465 +364,552 @@ export default function DashboardClient({
     switch (status) {
       case "verified":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-            <BadgeCheck className="w-4 h-4" /> Verified
-          </span>
+          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+            <BadgeCheck className="w-3.5 h-3.5" /> Verified
+          </Badge>
         );
       case "pending":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-            <Clock className="w-4 h-4" /> Pending Review
-          </span>
+          <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">
+            <Clock className="w-3.5 h-3.5" /> Pending Review
+          </Badge>
         );
       case "rejected":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-            <XCircle className="w-4 h-4" /> Rejected
-          </span>
+          <Badge variant="destructive">
+            <XCircle className="w-3.5 h-3.5" /> Rejected
+          </Badge>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+          <Badge variant="outline">
             Not Verified
-          </span>
+          </Badge>
         );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top nav */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-3">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-blue-600" />
-            <span className="font-bold text-lg">Rishan Verify</span>
-          </div>
-          <div className="flex items-center gap-4">
-            {verificationBadge()}
-            <span className="text-sm text-gray-600">{profile?.full_name || user.email}</span>
-            <button onClick={handleSignOut} className="text-gray-400 hover:text-gray-600">
-              <LogOut className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Tabs */}
-        <div className="flex gap-1 bg-white rounded-lg p-1 shadow-sm border border-gray-100 w-fit mb-8">
-          {[
-            { key: "profile" as const, label: "My Profile", icon: FileText },
-            { key: "resume" as const, label: "Resume Upload", icon: Upload },
-            { key: "verify" as const, label: "Get Verified", icon: BadgeCheck },
-          ].map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === key
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </button>
-          ))}
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <div className="flex items-center gap-3">
+            {verificationBadge()}
+            <span className="text-sm text-muted-foreground">{profile?.full_name || user.email}</span>
+          </div>
         </div>
 
-        {/* Profile tab */}
-        {activeTab === "profile" && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { label: "Full Name", key: "full_name" as const, placeholder: "John Doe" },
-                  { label: "Phone", key: "phone" as const, placeholder: "+1 (555) 123-4567" },
-                  { label: "Location", key: "location" as const, placeholder: "New York, NY" },
-                  { label: "Headline", key: "headline" as const, placeholder: "Senior Salesforce Developer" },
-                ].map(({ label, key, placeholder }) => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                    <input
-                      type="text"
-                      value={profileData[key]}
-                      onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
-                      placeholder={placeholder}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                ))}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Summary</label>
-                  <textarea
-                    value={profileData.summary}
-                    onChange={(e) => setProfileData({ ...profileData, summary: e.target.value })}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Brief professional summary..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Skills (comma-separated)</label>
-                  <input
-                    type="text"
-                    value={profileData.skills}
-                    onChange={(e) => setProfileData({ ...profileData, skills: e.target.value })}
-                    placeholder="Salesforce, Apex, JavaScript, SQL"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Domains (comma-separated)</label>
-                  <input
-                    type="text"
-                    value={profileData.domains}
-                    onChange={(e) => setProfileData({ ...profileData, domains: e.target.value })}
-                    placeholder="IT, Healthcare, Legal"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={handleSaveProfile}
-                disabled={saving}
-                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
-              >
-                {saving ? "Saving..." : "Save Profile"}
-              </button>
-            </div>
+        {/* Tabs */}
+        <Tabs defaultValue="profile">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="profile">
+              <FileText className="h-4 w-4 mr-2" />
+              My Profile
+            </TabsTrigger>
+            <TabsTrigger value="resume">
+              <Upload className="h-4 w-4 mr-2" />
+              Resume
+            </TabsTrigger>
+            <TabsTrigger value="verify">
+              <BadgeCheck className="h-4 w-4 mr-2" />
+              Verify
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Experience */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-gray-400" /> Work Experience
-                </h2>
-                <button onClick={() => setShowAddExp(!showAddExp)} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
-                  <Plus className="w-4 h-4" /> Add
-                </button>
-              </div>
-
-              {showAddExp && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Job Title *</label>
-                      <input type="text" value={newExp.title} onChange={(e) => setNewExp({ ...newExp, title: e.target.value })} placeholder="Software Engineer" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Company *</label>
-                      <input type="text" value={newExp.company} onChange={(e) => setNewExp({ ...newExp, company: e.target.value })} placeholder="Acme Inc." className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
-                      <input type="date" value={newExp.start_date} onChange={(e) => setNewExp({ ...newExp, start_date: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
-                      <input type="date" value={newExp.end_date} disabled={newExp.is_current} onChange={(e) => setNewExp({ ...newExp, end_date: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50" />
-                    </div>
-                  </div>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={newExp.is_current} onChange={(e) => setNewExp({ ...newExp, is_current: e.target.checked })} className="rounded" /> I currently work here
-                  </label>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
-                    <textarea value={newExp.description} onChange={(e) => setNewExp({ ...newExp, description: e.target.value })} rows={2} placeholder="Brief description of your role..." className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={handleAddExperience} disabled={!newExp.company || !newExp.title || addingExp} className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
-                      {addingExp ? "Adding..." : "Add Experience"}
-                    </button>
-                    <button onClick={() => setShowAddExp(false)} className="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
-                  </div>
-                </div>
-              )}
-
-              {experience.length === 0 && !showAddExp ? (
-                <p className="text-gray-500 text-sm">
-                  No experience added yet. Upload your resume to auto-fill, or click Add above.
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {experience.map((exp) => (
-                    <div key={exp.id} className="flex justify-between items-start border-b border-gray-100 pb-4 last:border-0">
-                      <div>
-                        <p className="font-medium">{exp.title}</p>
-                        <p className="text-sm text-gray-600">{exp.company}</p>
-                        <p className="text-xs text-gray-400">
-                          {exp.start_date || "?"} — {exp.is_current ? "Present" : exp.end_date || "?"}
-                        </p>
-                        {exp.description && (
-                          <p className="text-sm text-gray-500 mt-1">{exp.description}</p>
-                        )}
+          {/* ───────────── Profile Tab ───────────── */}
+          <TabsContent value="profile">
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Basic Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { label: "Full Name", key: "full_name" as const, placeholder: "John Doe" },
+                      { label: "Phone", key: "phone" as const, placeholder: "+1 (555) 123-4567" },
+                      { label: "Location", key: "location" as const, placeholder: "New York, NY" },
+                      { label: "Headline", key: "headline" as const, placeholder: "Senior Salesforce Developer" },
+                    ].map(({ label, key, placeholder }) => (
+                      <div key={key} className="space-y-2">
+                        <Label htmlFor={key}>{label}</Label>
+                        <Input
+                          id={key}
+                          type="text"
+                          value={profileData[key]}
+                          onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
+                          placeholder={placeholder}
+                        />
                       </div>
-                      <button
-                        onClick={() => handleDeleteExperience(exp.id)}
-                        className="text-gray-300 hover:text-red-500"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    ))}
+                    <div className="md:col-span-2 space-y-2">
+                      <Label htmlFor="summary">Summary</Label>
+                      <Textarea
+                        id="summary"
+                        value={profileData.summary}
+                        onChange={(e) => setProfileData({ ...profileData, summary: e.target.value })}
+                        rows={3}
+                        placeholder="Brief professional summary..."
+                      />
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Education */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-gray-400" /> Education
-                </h2>
-                <button onClick={() => setShowAddEdu(!showAddEdu)} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
-                  <Plus className="w-4 h-4" /> Add
-                </button>
-              </div>
-
-              {showAddEdu && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="col-span-2">
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Institution *</label>
-                      <input type="text" value={newEdu.institution} onChange={(e) => setNewEdu({ ...newEdu, institution: e.target.value })} placeholder="University of California, Berkeley" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <div className="space-y-2">
+                      <Label htmlFor="skills">Skills (comma-separated)</Label>
+                      <Input
+                        id="skills"
+                        type="text"
+                        value={profileData.skills}
+                        onChange={(e) => setProfileData({ ...profileData, skills: e.target.value })}
+                        placeholder="Salesforce, Apex, JavaScript, SQL"
+                      />
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Degree</label>
-                      <input type="text" value={newEdu.degree} onChange={(e) => setNewEdu({ ...newEdu, degree: e.target.value })} placeholder="Bachelor of Science" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Field of Study</label>
-                      <input type="text" value={newEdu.field_of_study} onChange={(e) => setNewEdu({ ...newEdu, field_of_study: e.target.value })} placeholder="Computer Science" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
-                      <input type="date" value={newEdu.start_date} onChange={(e) => setNewEdu({ ...newEdu, start_date: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
-                      <input type="date" value={newEdu.end_date} onChange={(e) => setNewEdu({ ...newEdu, end_date: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <div className="space-y-2">
+                      <Label htmlFor="domains">Domains (comma-separated)</Label>
+                      <Input
+                        id="domains"
+                        type="text"
+                        value={profileData.domains}
+                        onChange={(e) => setProfileData({ ...profileData, domains: e.target.value })}
+                        placeholder="IT, Healthcare, Legal"
+                      />
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={handleAddEducation} disabled={!newEdu.institution || addingEdu} className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
-                      {addingEdu ? "Adding..." : "Add Education"}
-                    </button>
-                    <button onClick={() => setShowAddEdu(false)} className="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
-                  </div>
-                </div>
-              )}
+                  <Button
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    className="mt-6"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {saving ? "Saving..." : "Save Profile"}
+                  </Button>
+                </CardContent>
+              </Card>
 
-              {education.length === 0 && !showAddEdu ? (
-                <p className="text-gray-500 text-sm">
-                  No education added yet. Upload your resume to auto-fill, or click Add above.
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {education.map((edu) => (
-                    <div key={edu.id} className="flex justify-between items-start border-b border-gray-100 pb-4 last:border-0">
-                      <div>
-                        <p className="font-medium">{edu.institution}</p>
-                        <p className="text-sm text-gray-600">
-                          {edu.degree}{edu.field_of_study ? ` in ${edu.field_of_study}` : ""}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {edu.start_date || "?"} — {edu.end_date || "?"}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteEducation(edu.id)}
-                        className="text-gray-300 hover:text-red-500"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Resume upload tab */}
-        {activeTab === "resume" && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-lg font-semibold mb-2">Upload Your Resume</h2>
-            <p className="text-gray-600 mb-6">
-              Upload your resume and our AI will automatically extract your experience,
-              education, and skills to build your profile.
-            </p>
-
-            {profile?.resume_file_path && (
-              <div className="mb-4 p-3 bg-green-50 rounded-lg text-green-700 text-sm flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Resume already uploaded. Upload a new one to replace it.
-              </div>
-            )}
-
-            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors">
-              <Upload className="w-10 h-10 text-gray-400 mb-2" />
-              <span className="text-sm font-medium text-gray-600">
-                {uploading
-                  ? "Uploading..."
-                  : parsing
-                  ? "AI is parsing your resume..."
-                  : "Click to upload PDF or DOCX"}
-              </span>
-              <span className="text-xs text-gray-400 mt-1">Max 10MB</span>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleResumeUpload}
-                disabled={uploading || parsing}
-                className="hidden"
-              />
-            </label>
-
-            {parsing && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-2 text-blue-700">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-700 border-t-transparent" />
-                  <span className="text-sm font-medium">
-                    Extracting experience, education, and skills from your resume...
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Verify tab */}
-        {activeTab === "verify" && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-lg font-semibold mb-2">Get Verified</h2>
-
-            {profile?.verification_status === "verified" ? (
-              <div className="space-y-6">
-                {/* Verified status */}
-                <div className="p-6 bg-green-50 rounded-xl">
-                  <div className="flex items-center gap-3 mb-2">
-                    <BadgeCheck className="w-8 h-8 text-green-600" />
-                    <span className="text-xl font-semibold text-green-700">You are verified!</span>
-                  </div>
-                  {latestVerification?.immigration_status && (
-                    <p className="text-green-700">
-                      Status: {latestVerification.immigration_status}
-                    </p>
-                  )}
-                  {profile.verification_expires_at && (
-                    <p className="text-green-600 text-sm mt-1">
-                      Valid until: {new Date(profile.verification_expires_at).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-
-                {/* Share your badge */}
-                <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Share2 className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-semibold text-blue-900">Share Your Verified Badge</h3>
-                  </div>
-                  <p className="text-sm text-blue-700 mb-4">
-                    Share your verified profile link on your resume, LinkedIn, or with
-                    recruiters to prove your identity and work authorization instantly.
-                  </p>
-
-                  {publicUrl ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-white rounded-lg border border-blue-300 px-4 py-2.5 flex items-center gap-2">
-                          <Link2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                          <span className="text-sm text-gray-700 truncate font-mono">
-                            {publicUrl}
-                          </span>
+              {/* Experience */}
+              <Card>
+                <CardHeader className="flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="w-5 h-5 text-muted-foreground" /> Work Experience
+                  </CardTitle>
+                  <Dialog open={showAddExp} onOpenChange={setShowAddExp}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Plus className="h-4 w-4 mr-1" /> Add
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Experience</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-2">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label htmlFor="exp-title">Job Title *</Label>
+                            <Input
+                              id="exp-title"
+                              value={newExp.title}
+                              onChange={(e) => setNewExp({ ...newExp, title: e.target.value })}
+                              placeholder="Software Engineer"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="exp-company">Company *</Label>
+                            <Input
+                              id="exp-company"
+                              value={newExp.company}
+                              onChange={(e) => setNewExp({ ...newExp, company: e.target.value })}
+                              placeholder="Acme Inc."
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="exp-start">Start Date</Label>
+                            <Input
+                              id="exp-start"
+                              type="date"
+                              value={newExp.start_date}
+                              onChange={(e) => setNewExp({ ...newExp, start_date: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="exp-end">End Date</Label>
+                            <Input
+                              id="exp-end"
+                              type="date"
+                              value={newExp.end_date}
+                              disabled={newExp.is_current}
+                              onChange={(e) => setNewExp({ ...newExp, end_date: e.target.value })}
+                            />
+                          </div>
                         </div>
-                        <button
-                          onClick={copyProfileLink}
-                          className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm flex-shrink-0"
-                        >
-                          {copied ? (
-                            <>
-                              <Check className="w-4 h-4" /> Copied!
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-4 h-4" /> Copy
-                            </>
-                          )}
-                        </button>
+                        <label className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={newExp.is_current}
+                            onChange={(e) => setNewExp({ ...newExp, is_current: e.target.checked })}
+                            className="rounded"
+                          />
+                          I currently work here
+                        </label>
+                        <div className="space-y-2">
+                          <Label htmlFor="exp-desc">Description</Label>
+                          <Textarea
+                            id="exp-desc"
+                            value={newExp.description}
+                            onChange={(e) => setNewExp({ ...newExp, description: e.target.value })}
+                            rows={2}
+                            placeholder="Brief description of your role..."
+                          />
+                        </div>
                       </div>
-                      <p className="text-xs text-blue-600">
-                        Anyone with this link can see your verified status, skills, and
-                        experience — but never your raw documents or personal ID information.
-                      </p>
-                    </div>
+                      <DialogFooter>
+                        <Button variant="ghost" onClick={() => setShowAddExp(false)}>
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleAddExperience}
+                          disabled={!newExp.company || !newExp.title || addingExp}
+                        >
+                          {addingExp ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          {addingExp ? "Adding..." : "Add Experience"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent>
+                  {experience.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">
+                      No experience added yet. Upload your resume to auto-fill, or click Add above.
+                    </p>
                   ) : (
-                    <button
-                      onClick={generatePublicSlug}
-                      disabled={generatingSlug}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm disabled:opacity-50"
-                    >
-                      <Link2 className="w-4 h-4" />
-                      {generatingSlug ? "Generating..." : "Generate My Public Profile Link"}
-                    </button>
+                    <div className="space-y-4">
+                      {experience.map((exp) => (
+                        <div key={exp.id} className="flex justify-between items-start border-b border-border pb-4 last:border-0">
+                          <div>
+                            <p className="font-medium text-foreground">{exp.title}</p>
+                            <p className="text-sm text-muted-foreground">{exp.company}</p>
+                            <p className="text-xs text-muted-foreground/60">
+                              {exp.start_date || "?"} — {exp.is_current ? "Present" : exp.end_date || "?"}
+                            </p>
+                            {exp.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{exp.description}</p>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteExperience(exp.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </div>
-              </div>
-            ) : profile?.verification_status === "pending" ? (
-              <div className="p-6 bg-yellow-50 rounded-xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <Clock className="w-8 h-8 text-yellow-600" />
-                  <span className="text-xl font-semibold text-yellow-700">
-                    Verification in progress
-                  </span>
-                </div>
-                <p className="text-yellow-700">
-                  Your ID has been submitted and is being reviewed. We&apos;ll notify you once
-                  the review is complete. Your document will be destroyed after review.
-                </p>
-              </div>
-            ) : (
-              <>
-                <p className="text-gray-600 mb-6">
-                  Submit a photo of your passport or government-issued ID. A human reviewer
-                  will verify your identity using official government sources. Your document
-                  is <strong>permanently destroyed</strong> immediately after verification.
+                </CardContent>
+              </Card>
+
+              {/* Education */}
+              <Card>
+                <CardHeader className="flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <GraduationCap className="w-5 h-5 text-muted-foreground" /> Education
+                  </CardTitle>
+                  <Dialog open={showAddEdu} onOpenChange={setShowAddEdu}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Plus className="h-4 w-4 mr-1" /> Add
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Education</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-2">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="col-span-2 space-y-2">
+                            <Label htmlFor="edu-institution">Institution *</Label>
+                            <Input
+                              id="edu-institution"
+                              value={newEdu.institution}
+                              onChange={(e) => setNewEdu({ ...newEdu, institution: e.target.value })}
+                              placeholder="University of California, Berkeley"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edu-degree">Degree</Label>
+                            <Input
+                              id="edu-degree"
+                              value={newEdu.degree}
+                              onChange={(e) => setNewEdu({ ...newEdu, degree: e.target.value })}
+                              placeholder="Bachelor of Science"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edu-field">Field of Study</Label>
+                            <Input
+                              id="edu-field"
+                              value={newEdu.field_of_study}
+                              onChange={(e) => setNewEdu({ ...newEdu, field_of_study: e.target.value })}
+                              placeholder="Computer Science"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edu-start">Start Date</Label>
+                            <Input
+                              id="edu-start"
+                              type="date"
+                              value={newEdu.start_date}
+                              onChange={(e) => setNewEdu({ ...newEdu, start_date: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edu-end">End Date</Label>
+                            <Input
+                              id="edu-end"
+                              type="date"
+                              value={newEdu.end_date}
+                              onChange={(e) => setNewEdu({ ...newEdu, end_date: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="ghost" onClick={() => setShowAddEdu(false)}>
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleAddEducation}
+                          disabled={!newEdu.institution || addingEdu}
+                        >
+                          {addingEdu ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          {addingEdu ? "Adding..." : "Add Education"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent>
+                  {education.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">
+                      No education added yet. Upload your resume to auto-fill, or click Add above.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {education.map((edu) => (
+                        <div key={edu.id} className="flex justify-between items-start border-b border-border pb-4 last:border-0">
+                          <div>
+                            <p className="font-medium text-foreground">{edu.institution}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {edu.degree}{edu.field_of_study ? ` in ${edu.field_of_study}` : ""}
+                            </p>
+                            <p className="text-xs text-muted-foreground/60">
+                              {edu.start_date || "?"} — {edu.end_date || "?"}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteEducation(edu.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* ───────────── Resume Upload Tab ───────────── */}
+          <TabsContent value="resume">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Your Resume</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Upload your resume and our AI will automatically extract your experience,
+                  education, and skills to build your profile.
                 </p>
 
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-amber-800">
-                    <strong>Privacy guarantee:</strong> Your passport photo is encrypted during
-                    upload, only accessible to authorized reviewers, and permanently deleted
-                    from our systems the moment verification is complete. We only retain the
-                    result (e.g. &ldquo;Verified&rdquo;), never the source document.
-                  </p>
-                </div>
+                {profile?.resume_file_path && (
+                  <Alert>
+                    <FileText className="h-4 w-4" />
+                    <AlertDescription>
+                      Resume already uploaded. Upload a new one to replace it.
+                    </AlertDescription>
+                  </Alert>
+                )}
 
-                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-green-400 hover:bg-green-50/50 transition-colors">
-                  <Camera className="w-10 h-10 text-gray-400 mb-2" />
-                  <span className="text-sm font-medium text-gray-600">
-                    {uploadingId
-                      ? "Uploading securely..."
-                      : "Click to upload passport photo"}
+                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                  <Upload className="w-10 h-10 text-muted-foreground mb-2" />
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {uploading
+                      ? "Uploading..."
+                      : parsing
+                      ? "AI is parsing your resume..."
+                      : "Click to upload PDF or DOCX"}
                   </span>
-                  <span className="text-xs text-gray-400 mt-1">
-                    JPG, PNG, or PDF. This will be deleted after review.
-                  </span>
+                  <span className="text-xs text-muted-foreground/60 mt-1">Max 10MB</span>
                   <input
                     type="file"
-                    accept=".jpg,.jpeg,.png,.pdf"
-                    onChange={handleIdUpload}
-                    disabled={uploadingId}
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleResumeUpload}
+                    disabled={uploading || parsing}
                     className="hidden"
                   />
                 </label>
-              </>
-            )}
-          </div>
-        )}
+
+                {parsing && (
+                  <Alert>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <AlertDescription>
+                      Extracting experience, education, and skills from your resume...
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ───────────── Verify Tab ───────────── */}
+          <TabsContent value="verify">
+            <Card>
+              <CardHeader>
+                <CardTitle>Get Verified</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {profile?.verification_status === "verified" ? (
+                  <div className="space-y-6">
+                    {/* Verified status */}
+                    <div className="p-6 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl">
+                      <div className="flex items-center gap-3 mb-2">
+                        <BadgeCheck className="w-8 h-8 text-emerald-600" />
+                        <span className="text-xl font-semibold text-emerald-700 dark:text-emerald-400">
+                          You are verified!
+                        </span>
+                      </div>
+                      {latestVerification?.immigration_status && (
+                        <p className="text-emerald-700 dark:text-emerald-400">
+                          Status: {latestVerification.immigration_status}
+                        </p>
+                      )}
+                      {profile.verification_expires_at && (
+                        <p className="text-emerald-600 dark:text-emerald-500 text-sm mt-1">
+                          Valid until: {new Date(profile.verification_expires_at).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Share your badge */}
+                    <div className="p-6 bg-primary/5 rounded-xl border border-primary/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Share2 className="w-5 h-5 text-primary" />
+                        <h3 className="font-semibold text-foreground">Share Your Verified Badge</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Share your verified profile link on your resume, LinkedIn, or with
+                        recruiters to prove your identity and work authorization instantly.
+                      </p>
+
+                      {publicUrl ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 rounded-lg border border-border px-4 py-2.5 flex items-center gap-2 bg-background">
+                              <Link2 className="w-4 h-4 text-primary flex-shrink-0" />
+                              <span className="text-sm text-foreground truncate font-mono">
+                                {publicUrl}
+                              </span>
+                            </div>
+                            <Button onClick={copyProfileLink} className="flex-shrink-0">
+                              {copied ? (
+                                <>
+                                  <Check className="w-4 h-4 mr-1" /> Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-4 h-4 mr-1" /> Copy
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Anyone with this link can see your verified status, skills, and
+                            experience — but never your raw documents or personal ID information.
+                          </p>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={generatePublicSlug}
+                          disabled={generatingSlug}
+                        >
+                          {generatingSlug ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Link2 className="w-4 h-4 mr-2" />}
+                          {generatingSlug ? "Generating..." : "Generate My Public Profile Link"}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ) : profile?.verification_status === "pending" ? (
+                  <div className="p-6 bg-amber-50 dark:bg-amber-950/30 rounded-xl">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Clock className="w-8 h-8 text-amber-600" />
+                      <span className="text-xl font-semibold text-amber-700 dark:text-amber-400">
+                        Verification in progress
+                      </span>
+                    </div>
+                    <p className="text-amber-700 dark:text-amber-400">
+                      Your ID has been submitted and is being reviewed. We&apos;ll notify you once
+                      the review is complete. Your document will be destroyed after review.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <p className="text-muted-foreground">
+                      Submit a photo of your passport or government-issued ID. A human reviewer
+                      will verify your identity using official government sources. Your document
+                      is <strong className="text-foreground">permanently destroyed</strong> immediately after verification.
+                    </p>
+
+                    <Alert>
+                      <AlertDescription>
+                        <strong>Privacy guarantee:</strong> Your passport photo is encrypted during
+                        upload, only accessible to authorized reviewers, and permanently deleted
+                        from our systems the moment verification is complete. We only retain the
+                        result (e.g. &ldquo;Verified&rdquo;), never the source document.
+                      </AlertDescription>
+                    </Alert>
+
+                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors">
+                      <Camera className="w-10 h-10 text-muted-foreground mb-2" />
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {uploadingId
+                          ? "Uploading securely..."
+                          : "Click to upload passport photo"}
+                      </span>
+                      <span className="text-xs text-muted-foreground/60 mt-1">
+                        JPG, PNG, or PDF. This will be deleted after review.
+                      </span>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={handleIdUpload}
+                        disabled={uploadingId}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -9,6 +9,9 @@ import {
   Calendar,
   ExternalLink,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import type { Metadata } from "next";
 
 interface Props {
@@ -99,17 +102,17 @@ export default async function PublicProfilePage({ params }: Props) {
     : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-3">
+      <nav className="bg-card/80 backdrop-blur-sm border-b border-border px-6 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-blue-600" />
-            <span className="font-bold text-sm text-gray-700">Rishan Verify</span>
+            <ShieldCheck className="w-5 h-5 text-primary" />
+            <span className="font-bold text-sm text-foreground">Rishan Verify</span>
           </div>
           <a
             href="/"
-            className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
           >
             Get verified yourself <ExternalLink className="w-3 h-3" />
           </a>
@@ -118,7 +121,7 @@ export default async function PublicProfilePage({ params }: Props) {
 
       <div className="max-w-3xl mx-auto px-6 py-10">
         {/* Verification Badge Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-green-200 overflow-hidden mb-8">
+        <Card className="border-emerald-200 dark:border-emerald-800 shadow-lg overflow-hidden mb-8 animate-fade-in-up">
           {/* Green verification banner */}
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-6">
             <div className="flex items-center gap-4">
@@ -146,125 +149,131 @@ export default async function PublicProfilePage({ params }: Props) {
           </div>
 
           {/* Verification details */}
-          <div className="px-8 py-6">
+          <CardContent className="px-8 py-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <BadgeCheck className="w-7 h-7 text-green-600" />
+                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
+                  <BadgeCheck className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
                 </div>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-lg font-semibold text-green-700">Identity Verified</h2>
-                  <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                  <h2 className="text-lg font-semibold text-emerald-700 dark:text-emerald-400">
+                    Identity Verified
+                  </h2>
+                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 hover:bg-emerald-100">
                     ✓ VERIFIED
-                  </span>
+                  </Badge>
                 </div>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-muted-foreground mb-3">
                   This person&apos;s identity and work authorization have been verified by
                   Rishan Verify through official government sources.
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                   {verification?.immigration_status && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500 mb-0.5">Work Authorization</p>
-                      <p className="font-medium text-gray-900">
+                    <div className="bg-muted rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-0.5">Work Authorization</p>
+                      <p className="font-medium text-foreground">
                         {verification.immigration_status}
                       </p>
                     </div>
                   )}
                   {verifiedDate && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500 mb-0.5">Verified Since</p>
-                      <p className="font-medium text-gray-900">{verifiedDate}</p>
+                    <div className="bg-muted rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-0.5">Verified Since</p>
+                      <p className="font-medium text-foreground">{verifiedDate}</p>
                     </div>
                   )}
                   {expiresDate && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500 mb-0.5">Valid Until</p>
-                      <p className="font-medium text-gray-900">{expiresDate}</p>
+                    <div className="bg-muted rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-0.5">Valid Until</p>
+                      <p className="font-medium text-foreground">{expiresDate}</p>
                     </div>
                   )}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Skills */}
         {profile.skills && profile.skills.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              Skills
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.skills.map((skill: string) => (
-                <span
-                  key={skill}
-                  className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
+          <Card className="mb-6 animate-fade-in">
+            <CardContent className="p-6">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                Skills
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {profile.skills.map((skill: string) => (
+                  <Badge key={skill} variant="secondary">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Experience */}
         {experience && experience.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Briefcase className="w-4 h-4" /> Experience
-            </h3>
-            <div className="space-y-5">
-              {experience.map((exp: { id: string; title: string; company: string; start_date: string | null; end_date: string | null; is_current: boolean; description: string | null }) => (
-                <div key={exp.id} className="relative pl-6 border-l-2 border-gray-200">
-                  <div className="absolute -left-[5px] top-1 w-2 h-2 bg-blue-500 rounded-full" />
-                  <p className="font-medium text-gray-900">{exp.title}</p>
-                  <p className="text-sm text-gray-600">{exp.company}</p>
-                  <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                    <Calendar className="w-3 h-3" />
-                    {exp.start_date || "?"} — {exp.is_current ? "Present" : exp.end_date || "?"}
-                  </p>
-                  {exp.description && (
-                    <p className="text-sm text-gray-500 mt-2">{exp.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <Card className="mb-6 animate-fade-in">
+            <CardContent className="p-6">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
+                <Briefcase className="w-4 h-4" /> Experience
+              </h3>
+              <div className="space-y-5">
+                {experience.map((exp: { id: string; title: string; company: string; start_date: string | null; end_date: string | null; is_current: boolean; description: string | null }) => (
+                  <div key={exp.id} className="relative pl-6 border-l-2 border-border">
+                    <div className="absolute -left-[5px] top-1 w-2 h-2 bg-primary rounded-full" />
+                    <p className="font-medium text-foreground">{exp.title}</p>
+                    <p className="text-sm text-muted-foreground">{exp.company}</p>
+                    <p className="text-xs text-muted-foreground/70 flex items-center gap-1 mt-0.5">
+                      <Calendar className="w-3 h-3" />
+                      {exp.start_date || "?"} — {exp.is_current ? "Present" : exp.end_date || "?"}
+                    </p>
+                    {exp.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{exp.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Education */}
         {education && education.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <GraduationCap className="w-4 h-4" /> Education
-            </h3>
-            <div className="space-y-4">
-              {education.map((edu: { id: string; institution: string; degree: string | null; field_of_study: string | null; start_date: string | null; end_date: string | null }) => (
-                <div key={edu.id} className="relative pl-6 border-l-2 border-gray-200">
-                  <div className="absolute -left-[5px] top-1 w-2 h-2 bg-emerald-500 rounded-full" />
-                  <p className="font-medium text-gray-900">{edu.institution}</p>
-                  <p className="text-sm text-gray-600">
-                    {edu.degree}
-                    {edu.field_of_study ? ` in ${edu.field_of_study}` : ""}
-                  </p>
-                  {(edu.start_date || edu.end_date) && (
-                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                      <Calendar className="w-3 h-3" />
-                      {edu.start_date || "?"} — {edu.end_date || "?"}
+          <Card className="mb-6 animate-fade-in">
+            <CardContent className="p-6">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
+                <GraduationCap className="w-4 h-4" /> Education
+              </h3>
+              <div className="space-y-4">
+                {education.map((edu: { id: string; institution: string; degree: string | null; field_of_study: string | null; start_date: string | null; end_date: string | null }) => (
+                  <div key={edu.id} className="relative pl-6 border-l-2 border-border">
+                    <div className="absolute -left-[5px] top-1 w-2 h-2 bg-emerald-500 rounded-full" />
+                    <p className="font-medium text-foreground">{edu.institution}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {edu.degree}
+                      {edu.field_of_study ? ` in ${edu.field_of_study}` : ""}
                     </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+                    {(edu.start_date || edu.end_date) && (
+                      <p className="text-xs text-muted-foreground/70 flex items-center gap-1 mt-0.5">
+                        <Calendar className="w-3 h-3" />
+                        {edu.start_date || "?"} — {edu.end_date || "?"}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Footer trust badge */}
-        <div className="text-center py-8">
-          <div className="inline-flex items-center gap-2 text-gray-400 text-xs">
+        <Separator className="my-6" />
+        <div className="text-center py-4">
+          <div className="inline-flex items-center gap-2 text-muted-foreground text-xs">
             <ShieldCheck className="w-4 h-4" />
             <span>
               Verified by Rishan Verify — Identity & work authorization confirmed through

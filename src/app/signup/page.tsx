@@ -3,13 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase-browser";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -18,6 +31,13 @@ export default function SignupPage() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (!agreed) {
+      setError("You must agree to the Terms of Service and Privacy Policy.");
+      toast.error("You must agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
+
     setLoading(true);
 
     const { error: signUpError } = await supabase.auth.signUp({
@@ -30,104 +50,116 @@ export default function SignupPage() {
 
     if (signUpError) {
       setError(signUpError.message);
+      toast.error(signUpError.message);
       setLoading(false);
       return;
     }
 
+    toast.success("Account created! Redirecting to dashboard...");
     router.push("/dashboard");
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2">
-            <ShieldCheck className="w-8 h-8 text-blue-600" />
+            <ShieldCheck className="size-8 text-primary" />
             <span className="text-xl font-bold">Rishan Verify</span>
           </Link>
-          <h1 className="mt-6 text-2xl font-bold">Create your account</h1>
-          <p className="mt-2 text-gray-600">
-            Get verified and stand out to employers
-          </p>
         </div>
 
-        <form
-          onSubmit={handleSignup}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-5"
-        >
-          {error && (
-            <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Create your account</CardTitle>
+            <CardDescription>
+              Get verified and stand out to employers
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSignup} className="space-y-4">
+              {error && (
+                <Alert variant="destructive" className="text-sm">
+                  {error}
+                </Alert>
+              )}
 
-          <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-              Full name
-            </label>
-            <input
-              id="fullName"
-              type="text"
-              required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="John Doe"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full name</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="John Doe"
+                />
+              </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="you@example.com"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Min 8 characters"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min 8 characters"
+                />
+              </div>
 
-          <div className="text-xs text-gray-500">
-            By signing up, you agree to our{" "}
-            <a href="#" className="text-blue-600 hover:underline">Terms of Service</a>{" "}
-            and{" "}
-            <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
-            You consent to Rishan Verify collecting and verifying your
-            professional credentials.
-          </div>
+              <div className="flex items-start gap-2">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="mt-1 size-4 rounded border-input accent-primary"
+                />
+                <label htmlFor="terms" className="text-xs text-muted-foreground">
+                  I agree to the{" "}
+                  <a href="#" className="font-medium text-primary hover:underline">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className="font-medium text-primary hover:underline">
+                    Privacy Policy
+                  </a>
+                  . I consent to Rishan Verify collecting and verifying my
+                  professional credentials.
+                </label>
+              </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
-        </form>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline font-medium">
+          <Link href="/login" className="font-medium text-primary hover:underline">
             Log in
           </Link>
         </p>

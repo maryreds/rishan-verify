@@ -132,105 +132,109 @@ export default function BadgePreview() {
       <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
 
         {/* ══════════════════════════════════════════
-            HERO — Profile + QR side by side
+            HERO — Badge card + details
         ══════════════════════════════════════════ */}
-        <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-violet-600/20 to-emerald-600/20 rounded-3xl blur-xl" />
-          <div className="relative bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 rounded-3xl overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-500" />
+        <div className="space-y-4">
 
-            <div className="p-8 flex flex-col lg:flex-row gap-8 items-start">
+          {/* ── Row 1: Badge card + QR card side by side ── */}
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch">
 
-              {/* Left: identity */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start gap-5">
-                  <div className="relative flex-shrink-0">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full blur-sm opacity-60" />
-                    <Image
-                      src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&crop=face"
-                      alt={demo.name}
-                      width={88}
-                      height={88}
-                      className="relative w-22 h-22 rounded-full object-cover ring-2 ring-white/10"
-                      style={{ width: 88, height: 88 }}
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center ring-4 ring-[#06060f]">
-                      <CheckCircle2 className="w-4 h-4 text-white" />
-                    </div>
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h1 className="text-2xl font-bold tracking-tight">{demo.name}</h1>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-[10px] font-bold tracking-wider">
-                        ✓ VERIFIED
-                      </span>
-                    </div>
-                    <p className="text-slate-400 text-sm">{demo.headline}</p>
-                    <p className="text-slate-500 text-xs mt-1 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" /> {demo.location}
-                    </p>
-                  </div>
+            {/* Badge card (photo + overlay) */}
+            <div
+              className="flex-shrink-0 relative rounded-3xl overflow-hidden"
+              style={{
+                width: 268,
+                boxShadow: "0 30px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)",
+              }}
+            >
+              <Image
+                src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=540&h=720&fit=crop&crop=face"
+                alt={demo.name}
+                width={268}
+                height={356}
+                className="object-cover w-full block"
+                style={{ height: 356 }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{ background: "linear-gradient(to top, rgba(4,4,18,0.95) 0%, rgba(4,4,18,0.55) 40%, transparent 70%)" }}
+              />
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h1 className="text-xl font-bold text-white tracking-tight">{demo.name}</h1>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500 rounded text-[9px] font-black tracking-wider text-white">
+                    ✓ VERIFIED
+                  </span>
                 </div>
-
-                {/* Meta info chips */}
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Verification ID", value: demo.verificationId, icon: Fingerprint },
-                    { label: "Work Auth", value: demo.workAuth, icon: FileCheck2 },
-                    { label: "Verified", value: demo.verifiedDate, icon: Clock },
-                    { label: "Valid Until", value: demo.validUntil, icon: Clock },
-                  ].map((item) => (
-                    <div key={item.label} className="bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 flex items-center gap-1">
-                        <item.icon className="w-3 h-3" /> {item.label}
-                      </p>
-                      <p className="text-sm font-semibold text-white truncate">{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right: QR Code card */}
-              <div className="flex-shrink-0 flex flex-col items-center">
-                <div className="relative">
-                  <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/30 to-violet-500/30 rounded-2xl blur-lg" />
-                  <div className="relative bg-[#0d0d1a] border border-white/10 rounded-2xl p-5 flex flex-col items-center gap-3">
-                    {/* RV monogram */}
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <ShieldCheck className="w-4 h-4 text-blue-400" />
-                      <span className="text-xs font-bold text-slate-300 tracking-widest uppercase">Rishan Verify</span>
-                    </div>
-
-                    {/* QR code */}
-                    <div className="bg-[#0d0d1a] rounded-xl overflow-hidden ring-1 ring-white/10">
-                      <Image
-                        src={qrUrl}
-                        alt="Scan to view verification badge"
-                        width={160}
-                        height={160}
-                        className="w-40 h-40"
-                        unoptimized
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                      <QrCode className="w-3 h-3" />
-                      <span>Scan to verify identity</span>
-                    </div>
-
-                    <div className="text-[9px] text-slate-600 font-mono text-center">
-                      {demo.verificationId}
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-[10px] text-slate-600 mt-3 text-center max-w-[160px] leading-relaxed">
-                  Add this QR anywhere — resume, LinkedIn, email signature
+                <p className="text-xs text-white/60 mb-4 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 flex-shrink-0" /> {demo.location} · {demo.headline.split("·")[0].trim()}
                 </p>
+                <div
+                  className="flex items-center gap-3 rounded-2xl px-4 py-3"
+                  style={{ background: "rgba(10,10,25,0.7)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
+                  <div className="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ boxShadow: "0 0 16px rgba(34,197,94,0.4)" }}>
+                    <ShieldCheck style={{ width: 18, height: 18, color: "white" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white leading-tight">Identity Verified</p>
+                    <p className="text-[10px] text-white/55 leading-tight mt-0.5">Work authorization confirmed via government sources</p>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* QR card — same height as badge card */}
+            <div className="relative flex-1" style={{ minWidth: 200 }}>
+              <div className="absolute -inset-1 bg-gradient-to-b from-blue-500/20 to-violet-500/20 rounded-3xl blur-xl" />
+              <div
+                className="relative h-full bg-[#0d0d1a] border border-white/10 rounded-3xl flex flex-col items-center justify-center gap-4 p-6"
+                style={{ minHeight: 356 }}
+              >
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-[10px] font-bold text-slate-300 tracking-widest uppercase">Share Badge</span>
+                </div>
+                <div className="bg-[#0d0d1a] rounded-2xl overflow-hidden ring-1 ring-white/10">
+                  <Image
+                    src={qrUrl}
+                    alt="Scan to view verification badge"
+                    width={148}
+                    height={148}
+                    className="w-[148px] h-[148px]"
+                    unoptimized
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-white mb-1">Scan to verify</p>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    Add anywhere — resume, LinkedIn, email signature
+                  </p>
+                </div>
+                <div className="text-[9px] text-slate-600 font-mono text-center">{demo.verificationId}</div>
+              </div>
+            </div>
+
           </div>
+
+          {/* ── Row 2: Meta chips spanning full width ── */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Verification ID", value: demo.verificationId, icon: Fingerprint },
+              { label: "Work Auth", value: demo.workAuth, icon: FileCheck2 },
+              { label: "Verified", value: demo.verifiedDate, icon: Clock },
+              { label: "Valid Until", value: demo.validUntil, icon: Clock },
+            ].map((item) => (
+              <div key={item.label} className="bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 flex items-center gap-1">
+                  <item.icon className="w-3 h-3" /> {item.label}
+                </p>
+                <p className="text-sm font-semibold text-white truncate">{item.value}</p>
+              </div>
+            ))}
+          </div>
+
         </div>
 
         {/* ══════════════════════════════════════════
@@ -269,12 +273,12 @@ export default function BadgePreview() {
 
                   {/* Gold rim — outer ring */}
                   <div style={{
-                    width: 136,
-                    height: 136,
+                    width: 108,
+                    height: 108,
                     borderRadius: "50%",
                     background: "linear-gradient(145deg, #f5e070 0%, #d4a817 25%, #a07818 55%, #c89820 75%, #ecd040 100%)",
-                    padding: 10,
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)",
+                    padding: 8,
+                    boxShadow: "0 8px 28px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)",
                     flexShrink: 0,
                   }}>
                     {/* Enamel fill — inner circle */}
@@ -295,39 +299,41 @@ export default function BadgePreview() {
                       {/* Enamel gloss highlight */}
                       <div style={{
                         position: "absolute",
-                        top: 8,
-                        left: 14,
-                        width: 36,
-                        height: 16,
+                        top: 6,
+                        left: 10,
+                        width: 26,
+                        height: 12,
                         borderRadius: "50%",
                         background: "rgba(255,255,255,0.18)",
                         filter: "blur(4px)",
                         transform: "rotate(-30deg)",
                       }} />
-                      <span style={{ fontSize: 28, lineHeight: 1, position: "relative", zIndex: 1 }}>{pin.icon}</span>
+                      <span style={{ fontSize: 20, lineHeight: 1, position: "relative", zIndex: 1 }}>{pin.icon}</span>
                       <p style={{
-                        fontSize: 11,
+                        fontSize: 9,
                         fontWeight: 900,
                         color: "white",
                         textAlign: "center",
                         lineHeight: 1.25,
                         textTransform: "uppercase" as const,
-                        letterSpacing: "0.04em",
-                        padding: "0 10px",
+                        letterSpacing: "0.03em",
+                        padding: "0 5px",
                         whiteSpace: "pre-line",
                         textShadow: "0 1px 4px rgba(0,0,0,0.6)",
                         position: "relative",
                         zIndex: 1,
                       }}>{pin.label}</p>
                       <p style={{
-                        fontSize: 7.5,
+                        fontSize: 5.5,
                         color: "rgba(255,255,255,0.65)",
                         textAlign: "center",
                         textTransform: "uppercase" as const,
-                        letterSpacing: "0.08em",
+                        letterSpacing: "0.04em",
                         position: "relative",
                         zIndex: 1,
                         padding: "0 8px",
+                        wordBreak: "break-word",
+                        lineHeight: 1.3,
                       }}>{pin.sublabel}</p>
                     </div>
                   </div>
@@ -345,9 +351,9 @@ export default function BadgePreview() {
                   boxShadow: "0 -1px 4px rgba(0,0,0,0.5)", marginBottom: -4, position: "relative", zIndex: 10,
                 }} />
                 <div style={{
-                  width: 136, height: 136, borderRadius: "50%",
+                  width: 108, height: 108, borderRadius: "50%",
                   background: "linear-gradient(145deg, #888 0%, #555 30%, #333 60%, #555 80%, #777 100%)",
-                  padding: 10,
+                  padding: 8,
                   boxShadow: "0 10px 40px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -3px 6px rgba(0,0,0,0.5)",
                 }}>
                   <div style={{
@@ -356,11 +362,11 @@ export default function BadgePreview() {
                     boxShadow: "inset 0 4px 12px rgba(0,0,0,0.5)",
                     display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", gap: 2,
                   }}>
-                    <span style={{ fontSize: 28, lineHeight: 1 }}>🔒</span>
-                    <p style={{ fontSize: 11, fontWeight: 900, color: "rgba(255,255,255,0.5)", textAlign: "center", lineHeight: 1.25, textTransform: "uppercase" as const, letterSpacing: "0.04em", padding: "0 10px" }}>
-                      MORE{"\n"}COMING
+                    <span style={{ fontSize: 20, lineHeight: 1 }}>🔒</span>
+                    <p style={{ fontSize: 9, fontWeight: 900, color: "rgba(255,255,255,0.5)", textAlign: "center", lineHeight: 1.25, textTransform: "uppercase" as const, letterSpacing: "0.03em", padding: "0 5px", whiteSpace: "pre-line" }}>
+                      {"MORE\nCOMING"}
                     </p>
-                    <p style={{ fontSize: 7.5, color: "rgba(255,255,255,0.3)", textAlign: "center", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                    <p style={{ fontSize: 5.5, color: "rgba(255,255,255,0.3)", textAlign: "center", textTransform: "uppercase" as const, letterSpacing: "0.04em", padding: "0 8px" }}>
                       EARN MORE BADGES
                     </p>
                   </div>
