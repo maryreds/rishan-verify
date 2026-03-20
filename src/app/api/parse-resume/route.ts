@@ -97,8 +97,8 @@ async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
 // ---------- Route handler ----------
 
 const useOpenAI = () => {
-  const provider = process.env.AI_PROVIDER || "openai";
-  return provider === "openai" && !!process.env.OPENAI_API_KEY;
+  const provider = (process.env.AI_PROVIDER || "openai").trim();
+  return provider === "openai" && !!(process.env.OPENAI_API_KEY || "").trim();
 };
 
 export async function POST(request: Request) {
@@ -126,8 +126,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "File too large. Maximum size is 10 MB." }, { status: 400 });
     }
 
-    const hasKey = useOpenAI() || !!process.env.GEMINI_API_KEY;
-    if (!hasKey) {
+    const openaiReady = useOpenAI();
+    const geminiReady = !!(process.env.GEMINI_API_KEY || "").trim();
+    console.log(`[parse-resume] AI_PROVIDER=${(process.env.AI_PROVIDER || "").trim()}, openaiReady=${openaiReady}, geminiReady=${geminiReady}, OPENAI_KEY_len=${(process.env.OPENAI_API_KEY || "").trim().length}`);
+    if (!openaiReady && !geminiReady) {
       return NextResponse.json(
         { error: "Resume parsing is not configured (missing API key)." },
         { status: 503 }
