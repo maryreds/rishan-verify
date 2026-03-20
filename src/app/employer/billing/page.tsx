@@ -187,7 +187,7 @@ function BillingContent() {
                       variant="outline"
                       className="w-full"
                       onClick={() =>
-                        (window.location.href = 'mailto:sales@rishanverify.com')
+                        (window.location.href = 'mailto:sales@vouch.app')
                       }
                     >
                       Contact Sales

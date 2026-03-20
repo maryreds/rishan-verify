@@ -1,16 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ShieldCheck,
   ArrowRight,
-  Sun,
-  Moon,
   Upload,
-  FileSearch,
+  Sparkles,
   BadgeCheck,
-  Scale,
   TrendingDown,
+  Scale,
+  Users,
+  Eye,
+  Zap,
 } from "lucide-react";
+import { VouchLogo } from "@/components/vouch/vouch-logo";
 
 const verifiedCandidates = [
   { name: "Rachel Williams", role: "Frontend Developer", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=320&h=400&fit=crop&crop=face" },
@@ -36,179 +41,242 @@ const avatarUrls = [
   "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=face",
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" as const },
+  }),
+};
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
       {/* Nav */}
       <nav className="relative z-50 flex items-center justify-between px-6 lg:px-12 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-emerald-500" />
-          <span className="text-base font-semibold tracking-tight">Rishan</span>
-          <span className="text-muted-foreground/40 select-none">&mdash;&mdash;</span>
-          <span className="text-base font-semibold tracking-tight">Verify</span>
-        </div>
+        <VouchLogo size="md" href="/" />
         <div className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
           <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
           <a href="#employers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Employers</a>
           <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-muted rounded-full p-0.5 gap-0.5">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground">
-              <Sun className="w-3.5 h-3.5" />Light
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground">
-              <Moon className="w-3.5 h-3.5" />Dark
-            </div>
-          </div>
           <Link className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" href="/login">
             Log In
           </Link>
-          <Link className="px-5 py-2.5 text-sm font-semibold text-white bg-foreground rounded-full hover:opacity-90 transition-all" href="/signup">
-            Get Verified
+          <Link className="px-5 py-2.5 text-sm font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all" href="/signup">
+            Get Vouched
           </Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <div className="relative">
-        <div className="relative z-10">
-          <section className="relative max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-20 lg:pt-20 lg:pb-32">
-            <div className="relative z-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-full mb-6">
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                    Recognized by top recruiters nationwide
-                  </span>
-                </div>
+      <section className="relative max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-20 lg:pt-20 lg:pb-32">
+        <div className="relative z-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              custom={0}
+              variants={fadeUp}
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6"
+            >
+              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <span className="text-xs font-medium text-primary">
+                Trusted by 500+ verified professionals
+              </span>
+            </motion.div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-serif leading-[1.1] tracking-tight">
-                  Cut through the noise.{" "}
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    Get the verified badge.
-                  </span>
-                </h1>
+            <motion.h1
+              initial="hidden"
+              animate="visible"
+              custom={1}
+              variants={fadeUp}
+              className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] tracking-tight"
+            >
+              Stop applying.{" "}
+              <span className="text-primary">
+                Start getting selected.
+              </span>
+            </motion.h1>
 
-                <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-lg">
-                  Don&apos;t let your resume get lost in a sea of automated
-                  applications. Earn a free, recruiter-trusted badge that
-                  verifies your identity and work authorization — instantly
-                  moving you to the top of the pile.
-                </p>
+            <motion.p
+              initial="hidden"
+              animate="visible"
+              custom={2}
+              variants={fadeUp}
+              className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-lg"
+            >
+              Build your Vouch Profile in 10 minutes. Verify your identity,
+              showcase your skills, and let employers come to you.
+            </motion.p>
 
-                <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                  <Link
-                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-semibold text-white bg-foreground rounded-full hover:opacity-90 transition-all"
-                    href="/signup"
-                  >
-                    Get Verified for Free
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <a
-                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-medium text-foreground bg-transparent border border-border rounded-full hover:bg-muted transition-all"
-                    href="#how-it-works"
-                  >
-                    See how it works
-                  </a>
-                </div>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              custom={3}
+              variants={fadeUp}
+              className="mt-10 flex flex-col sm:flex-row gap-4"
+            >
+              <Link
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all"
+                href="/signup?role=candidate"
+              >
+                I&apos;m a candidate
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-medium text-foreground bg-transparent border border-border rounded-full hover:bg-muted transition-all"
+                href="/signup?role=employer"
+              >
+                I&apos;m hiring
+              </Link>
+            </motion.div>
 
-                <div className="mt-12 flex items-center gap-4">
-                  <div className="flex -space-x-3">
-                    {avatarUrls.map((url, i) => (
-                      <Image
-                        key={i}
-                        alt=""
-                        src={url}
-                        width={36}
-                        height={36}
-                        className="rounded-full border-2 border-background object-cover"
-                      />
-                    ))}
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">
-                      Trusted by{" "}
-                      <span className="font-semibold text-foreground">
-                        500+
-                      </span>{" "}
-                      professionals
-                    </span>
-                  </div>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              custom={4}
+              variants={fadeUp}
+              className="mt-12 flex items-center gap-4"
+            >
+              <div className="flex -space-x-3">
+                {avatarUrls.map((url, i) => (
+                  <Image
+                    key={i}
+                    alt=""
+                    src={url}
+                    width={36}
+                    height={36}
+                    className="rounded-full border-2 border-background object-cover"
+                  />
+                ))}
+              </div>
+              <div className="text-sm">
+                <span className="text-muted-foreground">
+                  Trusted by{" "}
+                  <span className="font-semibold text-foreground">500+</span>{" "}
+                  professionals
+                </span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Hero — Vouch Profile Mockup */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+            className="relative"
+          >
+            <div className="relative rounded-3xl overflow-hidden border border-border bg-card shadow-2xl">
+              <div className="p-6 pb-0">
+                <div className="flex items-center gap-2 mb-4">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                  <span className="text-xs font-semibold text-primary tracking-wide uppercase">Vouch Profile</span>
                 </div>
               </div>
-
-              {/* Hero Image */}
               <div className="relative">
-                <div className="relative rounded-3xl overflow-hidden border border-border">
-                  <Image
-                    alt="Professional woman at work"
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=900&fit=crop&crop=face"
-                    width={800}
-                    height={900}
-                    className="w-full h-[500px] lg:h-[580px] object-cover"
-                    priority
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 65%)",
-                    }}
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="flex items-center gap-2.5 mb-1">
-                      <h3 className="text-2xl font-bold text-white tracking-tight">
-                        Sofia Rivera
-                      </h3>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500 rounded text-[10px] font-black tracking-wider text-white">
-                        &#10003; VERIFIED
-                      </span>
+                <Image
+                  alt="Professional woman at work"
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=900&fit=crop&crop=face"
+                  width={800}
+                  height={900}
+                  className="w-full h-[420px] lg:h-[480px] object-cover"
+                  priority
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 65%)",
+                  }}
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <h3 className="text-2xl font-bold text-white tracking-tight">Sofia Rivera</h3>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary rounded text-[10px] font-black tracking-wider text-primary-foreground">
+                      &#10003; VOUCHED
+                    </span>
+                  </div>
+                  <p className="text-sm text-white/60 mb-4 flex items-center gap-1.5">
+                    <span>Austin, TX</span>
+                    <span className="opacity-40">&middot;</span>
+                    <span>UX / UI Designer</span>
+                  </p>
+
+                  {/* Mini score ring */}
+                  <div className="flex items-center gap-3 rounded-2xl px-4 py-3 bg-black/50 backdrop-blur-md border border-white/10">
+                    <div className="relative w-10 h-10">
+                      <svg width="40" height="40" className="-rotate-90">
+                        <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+                        <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-vouch-score)" strokeWidth="3" strokeDasharray={100.53} strokeDashoffset={100.53 * 0.15} strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white">85</span>
                     </div>
-                    <p className="text-sm text-white/60 mb-5 flex items-center gap-1.5">
-                      <span>Austin, TX</span>
-                      <span className="opacity-40">&middot;</span>
-                      <span>UX / UI Designer</span>
-                    </p>
-                    <div className="flex items-center gap-3 rounded-2xl px-4 py-3 bg-black/50 backdrop-blur-md border border-white/10">
-                      <div className="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <ShieldCheck
-                          className="text-white"
-                          style={{ width: 18, height: 18 }}
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-white leading-tight">
-                          Identity Verified
-                        </p>
-                        <p className="text-[10px] text-white/50 leading-tight mt-0.5">
-                          Work authorization confirmed via government sources
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-sm font-bold text-white leading-tight">Vouch Score</p>
+                      <p className="text-[10px] text-white/50 leading-tight mt-0.5">Identity + skills verified</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
+          </motion.div>
         </div>
-      </div>
+      </section>
 
-      {/* Stats */}
-      <section className="border-y border-border bg-muted/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20 lg:py-28 bg-secondary/50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            custom={0}
+            variants={fadeUp}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Interview-ready in 10 minutes
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
+              Build your verified profile. Let AI do the heavy lifting.
+            </p>
+          </motion.div>
+          <div className="grid md:grid-cols-3 gap-8">
             {[
-              { value: "500+", label: "Verified Candidates" },
-              { value: "99.8%", label: "Accuracy Rate" },
-              { value: "<24h", label: "Avg. Verification Time" },
-              { value: "100%", label: "Documents Destroyed" },
-            ].map(({ value, label }) => (
-              <div className="text-center" key={label}>
-                <p className="text-3xl font-bold text-foreground">{value}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-              </div>
+              {
+                icon: Upload,
+                title: "1. Upload Your Resume",
+                desc: "Our AI extracts your experience, education, and skills automatically and builds your Vouch Profile.",
+              },
+              {
+                icon: Sparkles,
+                title: "2. Get Your Vouch Score",
+                desc: "Complete verifications and fill out your profile to boost your Vouch Score — the higher the score, the more employers see you.",
+              },
+              {
+                icon: BadgeCheck,
+                title: "3. Get Discovered",
+                desc: "Verified candidates appear first in employer searches. Share your Vouch Profile link anywhere.",
+              },
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <motion.div
+                key={title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                custom={i + 1}
+                variants={fadeUp}
+                className="text-center p-8 rounded-2xl border border-border bg-card"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground">{desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -237,67 +305,18 @@ export default function HomePage() {
                       className="w-full h-[220px] object-cover"
                       src={candidate.img}
                     />
-                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-emerald-500 rounded px-1.5 py-0.5">
-                      <ShieldCheck className="w-3 h-3 text-white" />
-                      <span className="text-[8px] font-bold text-white tracking-wide">
-                        VERIFIED
+                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-primary rounded px-1.5 py-0.5">
+                      <ShieldCheck className="w-3 h-3 text-primary-foreground" />
+                      <span className="text-[8px] font-bold text-primary-foreground tracking-wide">
+                        VOUCHED
                       </span>
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      {candidate.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">
-                      {candidate.role}
-                    </p>
+                    <p className="text-sm font-semibold text-foreground truncate">{candidate.name}</p>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{candidate.role}</p>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20 lg:py-28 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-serif tracking-tight">
-              Three steps to verified
-            </h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Get your verified badge in under 24 hours. It&apos;s free, secure, and
-              your documents are destroyed after review.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Upload,
-                title: "1. Upload Your Resume",
-                desc: "Our AI extracts your experience, education, and skills automatically.",
-              },
-              {
-                icon: FileSearch,
-                title: "2. Submit Your ID",
-                desc: "Upload a photo of your passport or government ID. It's encrypted and deleted after review.",
-              },
-              {
-                icon: BadgeCheck,
-                title: "3. Get Your Badge",
-                desc: "A human reviewer verifies your identity. Share your badge link anywhere.",
-              },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                className="text-center p-8 rounded-2xl border border-border bg-card"
-              >
-                <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                <p className="text-sm text-muted-foreground">{desc}</p>
               </div>
             ))}
           </div>
@@ -307,14 +326,21 @@ export default function HomePage() {
       {/* Employer Value Proposition */}
       <section id="employers" className="py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-serif tracking-tight">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            custom={0}
+            variants={fadeUp}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               For Employers &amp; Staffing Firms
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
               Stop wasting days on verification. Start hiring pre-verified talent.
             </p>
-          </div>
+          </motion.div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
@@ -332,31 +358,36 @@ export default function HomePage() {
                 title: "Compliance Built In",
                 desc: "I-9 compliance, work authorization tracking, and audit-ready verification records. Avoid $28,619 per-violation penalties.",
               },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <motion.div
                 key={title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                custom={i + 1}
+                variants={fadeUp}
                 className="p-8 rounded-2xl border border-border bg-card hover:shadow-md transition-shadow"
               >
-                <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center mb-5">
-                  <Icon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-5">
+                  <Icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 lg:py-28 bg-muted/30">
+      <section id="pricing" className="py-20 lg:py-28 bg-secondary/50">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-serif tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               Simple, Transparent Pricing
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-              Start free. Scale as you grow.
+              Free for candidates. Simple plans for employers.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -368,9 +399,9 @@ export default function HomePage() {
                 <span className="text-muted-foreground">/mo</span>
               </div>
               <ul className="space-y-3 text-sm text-muted-foreground mb-8 flex-1">
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> 50 searches/mo</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Basic filters</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Email support</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> 50 searches/mo</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Basic filters</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Email support</li>
               </ul>
               <Link
                 href="/employer/billing"
@@ -381,8 +412,8 @@ export default function HomePage() {
             </div>
 
             {/* Professional */}
-            <div className="relative flex flex-col p-8 rounded-2xl border-2 border-emerald-500 bg-card shadow-lg">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full">
+            <div className="relative flex flex-col p-8 rounded-2xl border-2 border-primary bg-card shadow-lg">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
                 Most Popular
               </span>
               <h3 className="text-lg font-semibold">Professional</h3>
@@ -391,14 +422,14 @@ export default function HomePage() {
                 <span className="text-muted-foreground">/mo</span>
               </div>
               <ul className="space-y-3 text-sm text-muted-foreground mb-8 flex-1">
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Unlimited searches</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Advanced filters</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Saved candidates</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Priority support</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Unlimited searches</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Advanced filters</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Saved candidates</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Priority support</li>
               </ul>
               <Link
                 href="/employer/billing"
-                className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-emerald-500 rounded-full hover:bg-emerald-600 transition-all"
+                className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all"
               >
                 Get Started
               </Link>
@@ -411,40 +442,18 @@ export default function HomePage() {
                 <span className="text-4xl font-bold">Custom</span>
               </div>
               <ul className="space-y-3 text-sm text-muted-foreground mb-8 flex-1">
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Everything in Pro</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> API access</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Bulk verification</li>
-                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Dedicated support</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Everything in Pro</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> API access</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Bulk verification</li>
+                <li className="flex items-center gap-2"><BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" /> Dedicated support</li>
               </ul>
-              <a
-                href="mailto:sales@rishanverify.com"
+              <Link
+                href="/employer/billing"
                 className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold border border-border rounded-full hover:bg-muted transition-all"
               >
                 Contact Sales
-              </a>
+              </Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust / Social Proof */}
-      <section className="py-16 lg:py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">
-            Trusted by staffing firms nationwide
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { value: "500+", label: "Candidates Verified" },
-              { value: "99.8%", label: "Verification Accuracy" },
-              { value: "<24h", label: "Avg. Verification Time" },
-              { value: "$0", label: "Document Retention" },
-            ].map(({ value, label }) => (
-              <div className="text-center" key={label}>
-                <p className="text-3xl font-bold text-foreground">{value}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -452,33 +461,37 @@ export default function HomePage() {
       {/* CTA */}
       <section className="py-20 lg:py-28">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-serif tracking-tight mb-6">
-            Ready to stand out?
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6">
+            Ready to get Vouched?
           </h2>
           <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
-            Join 500+ professionals who have earned their verified badge and are
-            getting noticed by top recruiters.
+            Join 500+ professionals who have built their Vouch Profile and are
+            getting discovered by top employers.
           </p>
-          <Link
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-white bg-foreground rounded-full hover:opacity-90 transition-all"
-            href="/signup"
-          >
-            Get Verified for Free
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all"
+              href="/signup?role=candidate"
+            >
+              I&apos;m a candidate
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium text-foreground border border-border rounded-full hover:bg-muted transition-all"
+              href="/signup?role=employer"
+            >
+              I&apos;m hiring
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-border py-8">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-emerald-500" />
-            <span className="text-sm font-semibold">Rishan Verify</span>
-          </div>
+          <VouchLogo size="sm" href="/" />
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Rishan Verify. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} Vouch. All rights reserved.
           </p>
         </div>
       </footer>

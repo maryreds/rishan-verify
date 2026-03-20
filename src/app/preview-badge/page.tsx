@@ -60,7 +60,7 @@ export default function PreviewBadgePage() {
           <div className="flex items-center gap-2.5">
             <ShieldCheck className="w-6 h-6 text-blue-400" />
             <span className="font-bold text-sm tracking-tight">
-              Rishan Verify
+              Vouch
             </span>
           </div>
           <Link
@@ -160,7 +160,7 @@ export default function PreviewBadgePage() {
                     width={148}
                     height={148}
                     className="w-[148px] h-[148px]"
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Frishan-verify.vercel.app%2Fpreview-badge&bgcolor=0d0d1a&color=ffffff&margin=12`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fvouch.app%2Fpreview-badge&bgcolor=0d0d1a&color=ffffff&margin=12`}
                   />
                 </div>
                 <div className="text-center">
@@ -318,7 +318,7 @@ export default function PreviewBadgePage() {
           <p className="text-xs text-slate-600">
             Verified by{" "}
             <Link href="/" className="text-blue-400 hover:text-blue-300">
-              Rishan Verify
+              Vouch
             </Link>{" "}
             &mdash; The trusted platform for background-checked candidates
           </p>

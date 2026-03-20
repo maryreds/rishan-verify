@@ -8,9 +8,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Rishan Verify — Verified Candidate Marketplace",
+  title: "Vouch — Stop Applying. Start Getting Selected.",
   description:
-    "Get verified. Stand out. The trusted platform for background-checked candidates in the staffing industry.",
+    "The verified candidate marketplace. Build your Vouch Profile, prove your credentials, and get discovered by top employers.",
 };
 
 export default function RootLayout({

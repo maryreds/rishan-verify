@@ -3,74 +3,86 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.145 0 0);
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.145 0 0);
-  --color-popover: oklch(1 0 0);
-  --color-popover-foreground: oklch(0.145 0 0);
-  --color-primary: oklch(0.205 0 0);
-  --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.97 0 0);
-  --color-secondary-foreground: oklch(0.205 0 0);
-  --color-muted: oklch(0.97 0 0);
-  --color-muted-foreground: oklch(0.556 0 0);
-  --color-accent: oklch(0.97 0 0);
-  --color-accent-foreground: oklch(0.205 0 0);
-  --color-destructive: oklch(0.577 0.245 27.325);
-  --color-border: oklch(0.922 0 0);
-  --color-input: oklch(0.922 0 0);
-  --color-ring: oklch(0.708 0 0);
-  --color-chart-1: oklch(0.646 0.222 41.116);
-  --color-chart-2: oklch(0.6 0.118 184.714);
-  --color-chart-3: oklch(0.398 0.07 227.392);
-  --color-chart-4: oklch(0.828 0.189 84.429);
-  --color-chart-5: oklch(0.769 0.188 70.08);
-  --color-sidebar: oklch(0.985 0 0);
-  --color-sidebar-foreground: oklch(0.145 0 0);
-  --color-sidebar-primary: oklch(0.205 0 0);
-  --color-sidebar-primary-foreground: oklch(0.985 0 0);
-  --color-sidebar-accent: oklch(0.97 0 0);
-  --color-sidebar-accent-foreground: oklch(0.205 0 0);
-  --color-sidebar-border: oklch(0.922 0 0);
-  --color-sidebar-ring: oklch(0.708 0 0);
+  /* Vouch brand: warm teal + amber — trust-forward, not corporate blue */
+  --color-background: #FDFCFB;
+  --color-foreground: #1A1A1A;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1A1A1A;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1A1A1A;
+  --color-primary: #0D7C66;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #F5F0EB;
+  --color-secondary-foreground: #1A1A1A;
+  --color-muted: #F0ECE7;
+  --color-muted-foreground: #6B6560;
+  --color-accent: #E8A838;
+  --color-accent-foreground: #1A1A1A;
+  --color-destructive: #DC3545;
+  --color-border: #E8E2DB;
+  --color-input: #E8E2DB;
+  --color-ring: #0D7C66;
+
+  /* Vouch semantic tokens */
+  --color-vouch-verified: #0D7C66;
+  --color-vouch-score: #E8A838;
+  --color-vouch-signal: #7C5CFC;
+
+  --color-chart-1: #0D7C66;
+  --color-chart-2: #E8A838;
+  --color-chart-3: #7C5CFC;
+  --color-chart-4: #DC3545;
+  --color-chart-5: #2DD4A8;
+  --color-sidebar: #F5F0EB;
+  --color-sidebar-foreground: #1A1A1A;
+  --color-sidebar-primary: #0D7C66;
+  --color-sidebar-primary-foreground: #FFFFFF;
+  --color-sidebar-accent: #F0ECE7;
+  --color-sidebar-accent-foreground: #1A1A1A;
+  --color-sidebar-border: #E8E2DB;
+  --color-sidebar-ring: #0D7C66;
   --radius: 0.625rem;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 .dark {
-  --color-background: oklch(0.145 0 0);
-  --color-foreground: oklch(0.985 0 0);
-  --color-card: oklch(0.205 0 0);
-  --color-card-foreground: oklch(0.985 0 0);
-  --color-popover: oklch(0.205 0 0);
-  --color-popover-foreground: oklch(0.985 0 0);
-  --color-primary: oklch(0.985 0 0);
-  --color-primary-foreground: oklch(0.205 0 0);
-  --color-secondary: oklch(0.269 0 0);
-  --color-secondary-foreground: oklch(0.985 0 0);
-  --color-muted: oklch(0.269 0 0);
-  --color-muted-foreground: oklch(0.708 0 0);
-  --color-accent: oklch(0.269 0 0);
-  --color-accent-foreground: oklch(0.985 0 0);
-  --color-destructive: oklch(0.396 0.141 25.723);
-  --color-border: oklch(0.269 0 0);
-  --color-input: oklch(0.269 0 0);
-  --color-ring: oklch(0.556 0 0);
-  --color-chart-1: oklch(0.488 0.243 264.376);
-  --color-chart-2: oklch(0.696 0.17 162.48);
-  --color-chart-3: oklch(0.769 0.188 70.08);
-  --color-chart-4: oklch(0.627 0.265 303.9);
-  --color-chart-5: oklch(0.645 0.246 16.439);
-  --color-sidebar: oklch(0.205 0 0);
-  --color-sidebar-foreground: oklch(0.985 0 0);
-  --color-sidebar-primary: oklch(0.488 0.243 264.376);
-  --color-sidebar-primary-foreground: oklch(0.985 0 0);
-  --color-sidebar-accent: oklch(0.269 0 0);
-  --color-sidebar-accent-foreground: oklch(0.985 0 0);
-  --color-sidebar-border: oklch(0.269 0 0);
-  --color-sidebar-ring: oklch(0.556 0 0);
+  --color-background: #0F0E0D;
+  --color-foreground: #F5F0EB;
+  --color-card: #1A1816;
+  --color-card-foreground: #F5F0EB;
+  --color-popover: #1A1816;
+  --color-popover-foreground: #F5F0EB;
+  --color-primary: #2DD4A8;
+  --color-primary-foreground: #0F0E0D;
+  --color-secondary: #1E1C1A;
+  --color-secondary-foreground: #F5F0EB;
+  --color-muted: #1E1C1A;
+  --color-muted-foreground: #9B9590;
+  --color-accent: #F0B952;
+  --color-accent-foreground: #0F0E0D;
+  --color-destructive: #F87171;
+  --color-border: #2A2725;
+  --color-input: #2A2725;
+  --color-ring: #2DD4A8;
+
+  --color-vouch-verified: #2DD4A8;
+  --color-vouch-score: #F0B952;
+  --color-vouch-signal: #A78BFA;
+
+  --color-chart-1: #2DD4A8;
+  --color-chart-2: #F0B952;
+  --color-chart-3: #A78BFA;
+  --color-chart-4: #F87171;
+  --color-chart-5: #0D7C66;
+  --color-sidebar: #1E1C1A;
+  --color-sidebar-foreground: #F5F0EB;
+  --color-sidebar-primary: #2DD4A8;
+  --color-sidebar-primary-foreground: #0F0E0D;
+  --color-sidebar-accent: #2A2725;
+  --color-sidebar-accent-foreground: #F5F0EB;
+  --color-sidebar-border: #2A2725;
+  --color-sidebar-ring: #2DD4A8;
 }
 
 @layer base {

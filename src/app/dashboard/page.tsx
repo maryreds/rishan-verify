@@ -39,6 +39,18 @@ export default async function DashboardPage() {
     .limit(1)
     .single();
 
+  // Get profile view count — graceful fallback if table doesn't exist yet
+  let profileViewCount = 0;
+  try {
+    const { count } = await supabase
+      .from("profile_views")
+      .select("id", { count: "exact", head: true })
+      .eq("profile_id", user.id);
+    profileViewCount = count ?? 0;
+  } catch {
+    // Table may not exist yet
+  }
+
   return (
     <DashboardClient
       user={user}
@@ -46,6 +58,7 @@ export default async function DashboardPage() {
       experience={experience ?? []}
       education={education ?? []}
       latestVerification={latestVerification}
+      profileViewCount={profileViewCount}
     />
   );
 }

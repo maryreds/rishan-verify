@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protected routes that require authentication
-  const protectedRoutes = ["/dashboard", "/admin", "/preview-badge", "/employer"];
+  const protectedRoutes = ["/dashboard", "/admin", "/preview-badge", "/employer", "/onboarding"];
   const isProtectedRoute = protectedRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
@@ -64,9 +64,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Onboarding redirect: if user hits /dashboard and hasn't completed onboarding
+  if (user && pathname === "/dashboard") {
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed_at")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && !profile.onboarding_completed_at) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/onboarding";
+        return NextResponse.redirect(url);
+      }
+    } catch {
+      // Column may not exist yet — skip onboarding check
+    }
+  }
+
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/preview-badge/:path*", "/employer/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/preview-badge/:path*", "/employer/:path*", "/onboarding/:path*"],
 };

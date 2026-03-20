@@ -1,25 +1,10 @@
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
+import { parseResume, parseResumeFromImage } from "@/lib/ai/services/resume-parser";
 
-// ---------- Types ----------
-interface Experience {
-  company: string;
-  title: string;
-  start_date: string | null;
-  end_date: string | null;
-  is_current: boolean;
-  description: string | null;
-}
+// ---------- Gemini fallback (kept for AI_PROVIDER=gemini) ----------
 
-interface Education {
-  institution: string;
-  degree: string | null;
-  field_of_study: string | null;
-  start_date: string | null;
-  end_date: string | null;
-}
-
-interface ParsedResume {
+interface GeminiParsedResume {
   full_name: string | null;
   phone: string | null;
   location: string | null;
@@ -27,11 +12,9 @@ interface ParsedResume {
   summary: string | null;
   skills: string[];
   domains: string[];
-  experience: Experience[];
-  education: Education[];
+  experience: { company: string; title: string; start_date: string | null; end_date: string | null; is_current: boolean; description: string | null }[];
+  education: { institution: string; degree: string | null; field_of_study: string | null; start_date: string | null; end_date: string | null }[];
 }
-
-// ---------- Prompt ----------
 
 const PARSE_PROMPT = `You are a resume parsing assistant. Extract structured data from this resume. Return ONLY valid JSON with exactly this schema:
 {
@@ -52,11 +35,7 @@ Rules:
 - If a field is not found, use null for scalars or [] for arrays
 - Do NOT invent data not in the resume`;
 
-// ---------- Gemini API ----------
-
-async function callGemini(
-  parts: Record<string, unknown>[]
-): Promise<ParsedResume> {
+async function callGemini(parts: Record<string, unknown>[]): Promise<GeminiParsedResume> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("NO_API_KEY");
 
@@ -67,20 +46,12 @@ async function callGemini(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.1,
-        },
+        generationConfig: { responseMimeType: "application/json", temperature: 0.1 },
       }),
     }
   );
 
-  if (response.status === 429) {
-    throw new Error(
-      "RATE_LIMITED: AI service quota exceeded. Please try again in a few minutes."
-    );
-  }
-
+  if (response.status === 429) throw new Error("RATE_LIMITED: AI service quota exceeded.");
   if (!response.ok) {
     const errorBody = await response.text();
     console.error("Gemini API error:", response.status, errorBody);
@@ -88,20 +59,11 @@ async function callGemini(
   }
 
   const result = await response.json();
-  const content =
-    result?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  const content = result?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  if (!content) throw new Error("Gemini returned empty response");
 
-  if (!content) {
-    console.error("Gemini empty response:", JSON.stringify(result));
-    throw new Error("Gemini returned empty response");
-  }
-
-  const jsonStr = content
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
-
-  return JSON.parse(jsonStr) as ParsedResume;
+  const jsonStr = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  return JSON.parse(jsonStr);
 }
 
 // ---------- Text extraction ----------
@@ -110,11 +72,7 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
     const uint8 = new Uint8Array(buffer);
-    const doc = await pdfjsLib.getDocument({
-      data: uint8,
-      useSystemFonts: true,
-    }).promise;
-
+    const doc = await pdfjsLib.getDocument({ data: uint8, useSystemFonts: true }).promise;
     const pages: string[] = [];
     for (let i = 1; i <= doc.numPages; i++) {
       const page = await doc.getPage(i);
@@ -138,6 +96,11 @@ async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
 
 // ---------- Route handler ----------
 
+const useOpenAI = () => {
+  const provider = process.env.AI_PROVIDER || "openai";
+  return provider === "openai" && !!process.env.OPENAI_API_KEY;
+};
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -145,10 +108,7 @@ export async function POST(request: Request) {
     const userId = formData.get("userId") as string | null;
 
     if (!file || !userId) {
-      return NextResponse.json(
-        { error: "Missing file or userId" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing file or userId" }, { status: 400 });
     }
 
     const fileName = file.name.toLowerCase();
@@ -156,22 +116,18 @@ export async function POST(request: Request) {
     const ext = fileName.substring(fileName.lastIndexOf("."));
     if (!allowedTypes.includes(ext)) {
       return NextResponse.json(
-        {
-          error: `Unsupported file type: ${ext}. Allowed: ${allowedTypes.join(", ")}`,
-        },
+        { error: `Unsupported file type: ${ext}. Allowed: ${allowedTypes.join(", ")}` },
         { status: 400 }
       );
     }
 
     const MAX_SIZE = 10 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: "File too large. Maximum size is 10 MB." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "File too large. Maximum size is 10 MB." }, { status: 400 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    const hasKey = useOpenAI() || !!process.env.GEMINI_API_KEY;
+    if (!hasKey) {
       return NextResponse.json(
         { error: "Resume parsing is not configured (missing API key)." },
         { status: 503 }
@@ -183,23 +139,24 @@ export async function POST(request: Request) {
 
     try {
       if (ext === ".pdf") {
-        // Try text extraction first (cheap)
         const extractedText = await extractTextFromPDF(buffer);
 
         if (extractedText.length > 50) {
           console.log(`PDF: extracted ${extractedText.length} chars via pdfjs`);
+          if (useOpenAI()) {
+            return NextResponse.json(await parseResume(extractedText));
+          }
           return NextResponse.json(
-            await callGemini([
-              {
-                text: `${PARSE_PROMPT}\n\nResume text:\n${extractedText.slice(0, 30000)}`,
-              },
-            ])
+            await callGemini([{ text: `${PARSE_PROMPT}\n\nResume text:\n${extractedText.slice(0, 30000)}` }])
           );
         }
 
-        // Design-tool PDF: send as base64 for visual reading
+        // Design-tool PDF: send as base64
         console.log("PDF: no text extracted, sending as base64");
         const base64 = buffer.toString("base64");
+        if (useOpenAI()) {
+          return NextResponse.json(await parseResumeFromImage(base64, "application/pdf"));
+        }
         return NextResponse.json(
           await callGemini([
             { inlineData: { mimeType: "application/pdf", data: base64 } },
@@ -210,30 +167,24 @@ export async function POST(request: Request) {
 
       if (ext === ".docx" || ext === ".doc") {
         const text = await extractTextFromDOCX(buffer);
-        console.log(`DOCX: extracted ${text.length} chars via mammoth`);
-
         if (text.length < 20) {
-          return NextResponse.json(
-            { error: "Could not extract text from the document." },
-            { status: 422 }
-          );
+          return NextResponse.json({ error: "Could not extract text from the document." }, { status: 422 });
         }
-
+        if (useOpenAI()) {
+          return NextResponse.json(await parseResume(text));
+        }
         return NextResponse.json(
-          await callGemini([
-            {
-              text: `${PARSE_PROMPT}\n\nResume text:\n${text.slice(0, 30000)}`,
-            },
-          ])
+          await callGemini([{ text: `${PARSE_PROMPT}\n\nResume text:\n${text.slice(0, 30000)}` }])
         );
       }
 
       // .txt
       const text = buffer.toString("utf-8");
+      if (useOpenAI()) {
+        return NextResponse.json(await parseResume(text));
+      }
       return NextResponse.json(
-        await callGemini([
-          { text: `${PARSE_PROMPT}\n\nResume text:\n${text.slice(0, 30000)}` },
-        ])
+        await callGemini([{ text: `${PARSE_PROMPT}\n\nResume text:\n${text.slice(0, 30000)}` }])
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -245,23 +196,14 @@ export async function POST(request: Request) {
         );
       }
       if (message === "NO_API_KEY") {
-        return NextResponse.json(
-          { error: "Resume parsing is not configured." },
-          { status: 503 }
-        );
+        return NextResponse.json({ error: "Resume parsing is not configured." }, { status: 503 });
       }
 
       console.error("Parsing error:", message);
-      return NextResponse.json(
-        { error: "Failed to parse resume. Please try again." },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Failed to parse resume. Please try again." }, { status: 500 });
     }
   } catch (error) {
     console.error("Resume parsing error:", error);
-    return NextResponse.json(
-      { error: "Failed to parse resume" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to parse resume" }, { status: 500 });
   }
 }
