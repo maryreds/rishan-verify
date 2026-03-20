@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -11,9 +10,6 @@ import {
   BadgeCheck,
   TrendingDown,
   Scale,
-  Users,
-  Eye,
-  Zap,
 } from "lucide-react";
 import { VouchLogo } from "@/components/vouch/vouch-logo";
 
@@ -34,12 +30,13 @@ const verifiedCandidates = [
   { name: "Vikram Nair", role: "Full-Stack Engineer", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=320&h=400&fit=crop&crop=face" },
 ];
 
-const avatarUrls = [
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1651684215020-f7a5b6610f23?w=80&h=80&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=80&h=80&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=face",
-];
+const marqueeImages = verifiedCandidates.map((c) => c.img);
+const duplicatedImages = [...marqueeImages, ...marqueeImages];
+
+const FADE_IN = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 100, damping: 20 } },
+};
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -71,157 +68,112 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-20 lg:pt-20 lg:pb-32">
-        <div className="relative z-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div>
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              custom={0}
-              variants={fadeUp}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6"
-            >
-              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              <span className="text-xs font-medium text-primary">
-                Trusted by 500+ verified professionals
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial="hidden"
-              animate="visible"
-              custom={1}
-              variants={fadeUp}
-              className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] tracking-tight"
-            >
-              Stop applying.{" "}
-              <span className="text-primary">
-                Start getting selected.
-              </span>
-            </motion.h1>
-
-            <motion.p
-              initial="hidden"
-              animate="visible"
-              custom={2}
-              variants={fadeUp}
-              className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-lg"
-            >
-              Build your Vouch Profile in 10 minutes. Verify your identity,
-              showcase your skills, and let employers come to you.
-            </motion.p>
-
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              custom={3}
-              variants={fadeUp}
-              className="mt-10 flex flex-col sm:flex-row gap-4"
-            >
-              <Link
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all"
-                href="/signup?role=candidate"
-              >
-                I&apos;m a candidate
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-medium text-foreground bg-transparent border border-border rounded-full hover:bg-muted transition-all"
-                href="/signup?role=employer"
-              >
-                I&apos;m hiring
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              custom={4}
-              variants={fadeUp}
-              className="mt-12 flex items-center gap-4"
-            >
-              <div className="flex -space-x-3">
-                {avatarUrls.map((url, i) => (
-                  <Image
-                    key={i}
-                    alt=""
-                    src={url}
-                    width={36}
-                    height={36}
-                    className="rounded-full border-2 border-background object-cover"
-                  />
-                ))}
-              </div>
-              <div className="text-sm">
-                <span className="text-muted-foreground">
-                  Trusted by{" "}
-                  <span className="font-semibold text-foreground">500+</span>{" "}
-                  professionals
-                </span>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Hero — Vouch Profile Mockup */}
+      {/* Hero — Centered with marquee */}
+      <section className="relative w-full min-h-[100vh] overflow-hidden flex flex-col items-start justify-start text-center px-4 pt-24 lg:pt-32 pb-0">
+        <div className="z-10 flex flex-col items-center w-full">
+          {/* Tagline */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
-            className="relative"
+            initial="hidden"
+            animate="show"
+            variants={FADE_IN}
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-4 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur-sm"
           >
-            <div className="relative rounded-3xl overflow-hidden border border-border bg-card shadow-2xl">
-              <div className="p-6 pb-0">
-                <div className="flex items-center gap-2 mb-4">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
-                  <span className="text-xs font-semibold text-primary tracking-wide uppercase">Vouch Profile</span>
-                </div>
-              </div>
-              <div className="relative">
-                <Image
-                  alt="Professional woman at work"
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=900&fit=crop&crop=face"
-                  width={800}
-                  height={900}
-                  className="w-full h-[420px] lg:h-[480px] object-cover"
-                  priority
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 65%)",
-                  }}
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <h3 className="text-2xl font-bold text-white tracking-tight">Sofia Rivera</h3>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary rounded text-[10px] font-black tracking-wider text-primary-foreground">
-                      &#10003; VOUCHED
-                    </span>
-                  </div>
-                  <p className="text-sm text-white/60 mb-4 flex items-center gap-1.5">
-                    <span>Austin, TX</span>
-                    <span className="opacity-40">&middot;</span>
-                    <span>UX / UI Designer</span>
-                  </p>
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            Trusted by 500+ verified professionals
+          </motion.div>
 
-                  {/* Mini score ring */}
-                  <div className="flex items-center gap-3 rounded-2xl px-4 py-3 bg-black/50 backdrop-blur-md border border-white/10">
-                    <div className="relative w-10 h-10">
-                      <svg width="40" height="40" className="-rotate-90">
-                        <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
-                        <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-vouch-score)" strokeWidth="3" strokeDasharray={100.53} strokeDashoffset={100.53 * 0.15} strokeLinecap="round" />
-                      </svg>
-                      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white">85</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white leading-tight">Vouch Score</p>
-                      <p className="text-[10px] text-white/50 leading-tight mt-0.5">Identity + skills verified</p>
-                    </div>
-                  </div>
+          {/* Main Title */}
+          <motion.h1
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: {},
+              show: { transition: { staggerChildren: 0.1 } },
+            }}
+            className="text-5xl md:text-7xl font-bold tracking-tighter text-foreground"
+          >
+            {["Stop", "applying."].map((word, i) => (
+              <motion.span key={i} variants={FADE_IN} className="inline-block">
+                {word}&nbsp;
+              </motion.span>
+            ))}
+            <br className="hidden sm:block" />
+            {["Start", "getting"].map((word, i) => (
+              <motion.span key={i + 2} variants={FADE_IN} className="inline-block text-primary">
+                {word}&nbsp;
+              </motion.span>
+            ))}
+            <motion.span variants={FADE_IN} className="inline-block text-primary">
+              selected.
+            </motion.span>
+          </motion.h1>
+
+          {/* Description */}
+          <motion.p
+            initial="hidden"
+            animate="show"
+            variants={FADE_IN}
+            transition={{ delay: 0.5 }}
+            className="mt-6 max-w-xl text-lg text-muted-foreground"
+          >
+            Build your Vouch Profile in 10 minutes. Verify your identity,
+            showcase your skills, and let employers come to you.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={FADE_IN}
+            transition={{ delay: 0.6 }}
+            className="mt-8 flex flex-col sm:flex-row gap-4"
+          >
+            <Link
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all shadow-lg"
+              href="/signup?role=candidate"
+            >
+              I&apos;m a candidate
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-medium text-foreground bg-transparent border border-border rounded-full hover:bg-muted transition-all"
+              href="/signup?role=employer"
+            >
+              I&apos;m hiring
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* Animated Image Marquee */}
+        <div className="absolute bottom-0 left-0 w-full h-[28%] md:h-[32%] pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)" }}>
+          <motion.div
+            className="flex gap-4"
+            animate={{
+              x: ["-50%", "0%"],
+            }}
+            transition={{
+              ease: "linear",
+              duration: 40,
+              repeat: Infinity,
+            }}
+          >
+            {duplicatedImages.map((src, index) => (
+              <div
+                key={index}
+                className="relative aspect-[3/4] h-48 md:h-64 flex-shrink-0"
+                style={{ rotate: `${index % 2 === 0 ? -2 : 5}deg` }}
+              >
+                <img
+                  src={src}
+                  alt={`Verified professional ${(index % verifiedCandidates.length) + 1}`}
+                  className="w-full h-full object-cover rounded-2xl shadow-md"
+                />
+                <div className="absolute top-2 right-2 flex items-center gap-1 bg-primary rounded px-1.5 py-0.5">
+                  <ShieldCheck className="w-2.5 h-2.5 text-primary-foreground" />
+                  <span className="text-[7px] font-bold text-primary-foreground tracking-wide">VOUCHED</span>
                 </div>
               </div>
-            </div>
+            ))}
           </motion.div>
         </div>
       </section>
@@ -277,47 +229,6 @@ export default function HomePage() {
                 <h3 className="text-lg font-semibold mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground">{desc}</p>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Verified Candidates Gallery */}
-      <section className="relative py-16 lg:py-20">
-        <div className="text-center mb-10 relative z-10">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            500+ professionals verified and counting
-          </p>
-        </div>
-        <div className="relative w-full overflow-hidden">
-          <div className="absolute top-0 left-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-          <div className="absolute top-0 right-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-          <div className="flex gap-5 px-6 overflow-x-auto scrollbar-hide pb-4">
-            {verifiedCandidates.map((candidate) => (
-              <div key={candidate.name} className="flex-shrink-0 w-[180px]">
-                <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                  <div className="relative">
-                    <img
-                      alt={candidate.name}
-                      loading="lazy"
-                      width={180}
-                      height={220}
-                      className="w-full h-[220px] object-cover"
-                      src={candidate.img}
-                    />
-                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-primary rounded px-1.5 py-0.5">
-                      <ShieldCheck className="w-3 h-3 text-primary-foreground" />
-                      <span className="text-[8px] font-bold text-primary-foreground tracking-wide">
-                        VOUCHED
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <p className="text-sm font-semibold text-foreground truncate">{candidate.name}</p>
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">{candidate.role}</p>
-                  </div>
-                </div>
-              </div>
             ))}
           </div>
         </div>
