@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -175,6 +175,44 @@ export default function DashboardClient({
   const [linkCopied, setLinkCopied] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
   const [startingPersona, setStartingPersona] = useState(false);
+  const [vouchScore, setVouchScore] = useState(profile?.vouch_score || 0);
+  const [uploadingHeadshot, setUploadingHeadshot] = useState(false);
+  const [headshot, setHeadshot] = useState(profile?.photo_original_url || null);
+  const headshotInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-calculate vouch score on mount
+  useEffect(() => {
+    fetch("/api/profile/vouch-score", { method: "POST" })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => { if (data?.total != null) setVouchScore(data.total); })
+      .catch(() => {});
+  }, []);
+
+  async function handleHeadshotUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingHeadshot(true);
+
+    const filePath = `${user.id}/headshot-${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("photos").upload(filePath, file);
+    if (error) {
+      toast.error("Upload failed", { description: error.message });
+      setUploadingHeadshot(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage.from("photos").getPublicUrl(filePath);
+    await supabase.from("profiles").update({ photo_original_url: publicUrl }).eq("id", user.id);
+    setHeadshot(publicUrl);
+    setUploadingHeadshot(false);
+    toast.success("Headshot uploaded!");
+
+    // Recalculate score
+    fetch("/api/profile/vouch-score", { method: "POST" })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => { if (data?.total != null) setVouchScore(data.total); })
+      .catch(() => {});
+  }
 
   const publicUrl = profile?.vanity_slug
     ? `/v/${profile.vanity_slug}`
@@ -489,59 +527,125 @@ export default function DashboardClient({
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Two-column hero section */}
-        <div className="grid lg:grid-cols-5 gap-6 mb-8">
-          {/* Left: Vouch Score + AI Coach */}
-          <div className="lg:col-span-3 space-y-4">
+        {/* Hero section */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          {/* Left: Photo + Name + Score */}
+          <div className="lg:col-span-2">
             <Card>
-              <CardContent className="py-6 flex items-center gap-8">
-                <ScoreRing score={profile?.vouch_score || 0} size={120} strokeWidth={8} />
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold tracking-tight mb-1">Your Vouch Score</h2>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {(profile?.vouch_score || 0) < 50
-                      ? "Complete your profile and verifications to boost your score."
-                      : (profile?.vouch_score || 0) < 75
-                        ? "Good progress! Add more details to rank higher."
-                        : "Great score! Employers are more likely to discover you."}
-                  </p>
-                  <div className="flex gap-2">
-                    {!profile?.verification_status || profile.verification_status === "unverified" ? (
-                      <Button size="sm" variant="outline" onClick={() => document.querySelector<HTMLButtonElement>('[data-value="verify"]')?.click()}>
-                        <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify Identity
-                      </Button>
-                    ) : null}
-                    {publicUrl && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          navigator.clipboard.writeText(window.location.origin + publicUrl);
-                          toast.success("Profile link copied!");
-                        }}
-                      >
-                        <Share2 className="w-3.5 h-3.5 mr-1" /> Share Profile
-                      </Button>
+              <CardContent className="py-6 px-6">
+                <div className="flex items-start gap-6">
+                  {/* Headshot */}
+                  <div className="flex-shrink-0">
+                    <input
+                      ref={headshotInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleHeadshotUpload}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => headshotInputRef.current?.click()}
+                      disabled={uploadingHeadshot}
+                      className="relative group"
+                    >
+                      {headshot ? (
+                        <img
+                          src={headshot}
+                          alt="Headshot"
+                          className="w-20 h-20 rounded-full object-cover border-2 border-border group-hover:border-primary transition-colors"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-dashed border-primary/30 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/20 transition-colors">
+                          {uploadingHeadshot ? (
+                            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                          ) : (
+                            <Camera className="w-6 h-6 text-primary/60 group-hover:text-primary transition-colors" />
+                          )}
+                        </div>
+                      )}
+                      <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Camera className="w-3 h-3" />
+                      </div>
+                    </button>
+                    {!headshot && (
+                      <p className="text-[10px] text-muted-foreground text-center mt-1.5 w-20">Add photo</p>
                     )}
+                  </div>
+
+                  {/* Name + headline + score */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h2 className="text-xl font-bold tracking-tight">{profile?.full_name || user.email}</h2>
+                        <p className="text-sm text-muted-foreground">{profile?.headline || "Add a headline in your profile"}</p>
+                      </div>
+                      <ScoreRing score={vouchScore} size={72} strokeWidth={5} />
+                    </div>
+
+                    {/* Skill badges */}
+                    {profile?.skills && profile.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {profile.skills.slice(0, 6).map((skill) => (
+                          <span
+                            key={skill}
+                            className="px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-medium rounded-full"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {profile.skills.length > 6 && (
+                          <span className="text-[11px] text-muted-foreground self-center">
+                            +{profile.skills.length - 6} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Quick actions */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {verificationStatus === "unverified" && (
+                        <Button size="sm" variant="outline" onClick={() => document.querySelector<HTMLButtonElement>('[data-value="verify"]')?.click()}>
+                          <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Verify Identity
+                        </Button>
+                      )}
+                      {publicUrl ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            navigator.clipboard.writeText(window.location.origin + publicUrl);
+                            toast.success("Profile link copied!");
+                          }}
+                        >
+                          <Share2 className="w-3.5 h-3.5 mr-1" /> Share Profile
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={generatePublicSlug} disabled={generatingSlug}>
+                          <Link2 className="w-3.5 h-3.5 mr-1" /> {generatingSlug ? "Generating..." : "Get Public Link"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* AI Coach Card */}
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="py-4 px-5 flex items-center gap-3">
+            <Card className="border-primary/20 bg-primary/5 mt-4">
+              <CardContent className="py-3 px-5 flex items-center gap-3">
                 <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">AI Coach Tip</p>
                   <p className="text-xs text-muted-foreground">
-                    {!profile?.summary
-                      ? "Add a professional summary to increase your Vouch Score by up to 5 points."
-                      : experienceList.length === 0
-                        ? "Upload your resume to auto-fill your work experience."
-                        : !profile?.photo_original_url
-                          ? "Add a professional headshot to make your profile stand out."
-                          : "Your profile is looking great! Keep it updated for best results."}
+                    {!headshot
+                      ? "Add a professional headshot — profiles with photos get 3x more views."
+                      : !profile?.summary
+                        ? "Add a professional summary to boost your Vouch Score."
+                        : experienceList.length === 0
+                          ? "Upload your resume to auto-fill your work experience."
+                          : verificationStatus === "unverified"
+                            ? "Verify your identity to unlock the full Vouch Score (up to +30 pts)."
+                            : "Your profile is looking great! Keep it updated for best results."}
                   </p>
                 </div>
               </CardContent>
@@ -549,7 +653,7 @@ export default function DashboardClient({
           </div>
 
           {/* Right: Stats */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="space-y-4">
             <Card>
               <CardContent className="py-4 px-5 flex items-center gap-3">
                 <Eye className="h-5 w-5 text-[var(--color-vouch-signal)] flex-shrink-0" />
