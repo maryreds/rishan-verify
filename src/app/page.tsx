@@ -56,6 +56,7 @@ export default function HomePage() {
         <div className="hidden md:flex items-center gap-8">
           <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
           <a href="#employers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Employers</a>
+          <Link href="/employer/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link>
           <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
         </div>
         <div className="flex items-center gap-3">
@@ -187,50 +188,17 @@ export default function HomePage() {
             viewport={{ once: true }}
             custom={0}
             variants={fadeUp}
-            className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Interview-ready in 10 minutes
-            </h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Build your verified profile. Let AI do the heavy lifting.
-            </p>
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full mx-auto rounded-2xl"
+            >
+              <source src="/how-it-works.mp4" type="video/mp4" />
+            </video>
           </motion.div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Upload,
-                title: "1. Upload Your Resume",
-                desc: "Our AI extracts your experience, education, and skills automatically and builds your Vouch Profile.",
-              },
-              {
-                icon: Sparkles,
-                title: "2. Get Your Vouch Score",
-                desc: "Complete verifications and fill out your profile to boost your Vouch Score — the higher the score, the more employers see you.",
-              },
-              {
-                icon: BadgeCheck,
-                title: "3. Get Discovered",
-                desc: "Verified candidates appear first in employer searches. Share your Vouch Profile link anywhere.",
-              },
-            ].map(({ icon: Icon, title, desc }, i) => (
-              <motion.div
-                key={title}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                custom={i + 1}
-                variants={fadeUp}
-                className="text-center p-8 rounded-2xl border border-border bg-card"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                <p className="text-sm text-muted-foreground">{desc}</p>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -287,6 +255,22 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            custom={4}
+            variants={fadeUp}
+            className="mt-12 text-center"
+          >
+            <Link
+              href="/employer/marketplace"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all shadow-lg"
+            >
+              Browse Verified Candidates
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
         </div>
       </section>
 

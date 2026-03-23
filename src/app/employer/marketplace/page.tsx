@@ -13,7 +13,7 @@ import {
   Eye,
   Filter,
   Users,
-  ArrowLeft,
+
   Star,
   Clock,
   TrendingUp,
@@ -402,7 +402,7 @@ const PILLAR_CONFIG = [
 // Component
 // ---------------------------------------------------------------------------
 
-export default function EmployerDemoPage() {
+export default function EmployerMarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [skillFilter, setSkillFilter] = useState("all");
@@ -464,22 +464,6 @@ export default function EmployerDemoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Demo banner */}
-      <div className="bg-primary/10 border-b border-primary/20">
-        <div className="max-w-7xl mx-auto px-6 py-2.5 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <Eye className="w-4 h-4 text-primary" />
-            <span className="font-medium text-primary">Demo Mode</span>
-            <span className="text-muted-foreground">— This is a preview with sample candidates</span>
-          </div>
-          <Link href="/signup?role=employer">
-            <Button size="sm" variant="default" className="rounded-full text-xs">
-              Sign Up for Real Access
-            </Button>
-          </Link>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="border-b">
         <div className="max-w-7xl mx-auto px-6 py-6">
