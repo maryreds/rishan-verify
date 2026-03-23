@@ -470,7 +470,7 @@ export default function EmployerMarketplacePage() {
         <nav className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm">
           <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <VouchLogo size="md" href="/" />
+              <VouchLogo size="lg" href="/" />
               <div className="hidden sm:flex h-6 w-px bg-border" />
               <span className="hidden sm:block text-sm font-medium tracking-tight text-foreground">
                 Talent Marketplace
