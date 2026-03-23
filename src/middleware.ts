@@ -36,6 +36,16 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // Public routes that are excluded from protection (nested under otherwise-protected prefixes)
+  const publicRoutes = ["/reference", "/employer/marketplace"];
+  const isPublicRoute = publicRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
+
+  if (isPublicRoute) {
+    return supabaseResponse;
+  }
+
   // Protected routes that require authentication
   const protectedRoutes = ["/dashboard", "/admin", "/preview-badge", "/employer", "/onboarding"];
   const isProtectedRoute = protectedRoutes.some(
