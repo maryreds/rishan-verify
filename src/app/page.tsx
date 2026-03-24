@@ -70,8 +70,8 @@ export default function HomePage() {
       </nav>
 
       {/* Hero — Centered with marquee */}
-      <section className="relative w-full min-h-[100vh] overflow-hidden flex flex-col items-start justify-start text-center px-4 pt-24 lg:pt-32 pb-0">
-        <div className="z-10 flex flex-col items-center w-full">
+      <section className="relative w-full min-h-[100vh] overflow-hidden flex flex-col items-start justify-start text-center px-4 pt-12 lg:pt-20 pb-0">
+        <div className="z-20 flex flex-col items-center w-full relative">
           {/* Tagline */}
           <motion.div
             initial="hidden"
@@ -81,6 +81,24 @@ export default function HomePage() {
           >
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             Trusted by 500+ verified professionals
+          </motion.div>
+
+          {/* Fox Animation */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 80, damping: 20, delay: 0.15 }}
+            className="mb-4 w-full max-w-[160px] sm:max-w-[200px] md:max-w-[240px] mx-auto"
+          >
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-auto rounded-2xl"
+            >
+              <source src="/fox-vouch.mp4" type="video/mp4" />
+            </video>
           </motion.div>
 
           {/* Main Title */}
@@ -127,7 +145,7 @@ export default function HomePage() {
             animate="show"
             variants={FADE_IN}
             transition={{ delay: 0.6 }}
-            className="mt-8 flex flex-col sm:flex-row gap-4"
+            className="mt-8 mb-16 md:mb-24 flex flex-col sm:flex-row gap-4"
           >
             <Link
               className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-semibold text-primary-foreground bg-primary rounded-full hover:opacity-90 transition-all shadow-lg"
@@ -146,7 +164,7 @@ export default function HomePage() {
         </div>
 
         {/* Animated Image Marquee */}
-        <div className="absolute bottom-0 left-0 w-full h-[28%] md:h-[32%] pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)" }}>
+        <div className="absolute bottom-0 left-0 w-full h-[16%] md:h-[18%] pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, transparent, black 30%, black 80%, transparent)" }}>
           <motion.div
             className="flex gap-4"
             animate={{
