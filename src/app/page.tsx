@@ -206,17 +206,50 @@ export default function HomePage() {
             viewport={{ once: true }}
             custom={0}
             variants={fadeUp}
+            className="text-center mb-16"
           >
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full mx-auto rounded-2xl"
-            >
-              <source src="/how-it-works.mp4" type="video/mp4" />
-            </video>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Interview-ready in 10 minutes
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
+              Build your verified profile. Let AI do the heavy lifting.
+            </p>
           </motion.div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Upload,
+                title: "1. Upload Your Resume",
+                desc: "Our AI extracts your experience, education, and skills automatically and builds your Vouch Profile.",
+              },
+              {
+                icon: Sparkles,
+                title: "2. Get Your Vouch Score",
+                desc: "Complete verifications and fill out your profile to boost your Vouch Score — the higher the score, the more employers see you.",
+              },
+              {
+                icon: BadgeCheck,
+                title: "3. Get Discovered",
+                desc: "Verified candidates appear first in employer searches. Share your Vouch Profile link anywhere.",
+              },
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <motion.div
+                key={title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                custom={i + 1}
+                variants={fadeUp}
+                className="text-center p-8 rounded-2xl border border-border bg-card"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground">{desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
