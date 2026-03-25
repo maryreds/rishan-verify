@@ -1075,13 +1075,14 @@ function CandidateCard({ candidate, isSaved, onToggleSave, onViewProfile }: Cand
 
       {/* Bottom row: View Full Profile + Chat icon */}
       <div className="flex items-center gap-2 mt-5 pt-4 border-t border-border/40">
-        <button
+        <Link
+          href={`/employer/candidate/${candidate.id}`}
           className="flex-1 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-semibold hover:from-emerald-600 hover:to-green-600 transition-all shadow-sm shadow-emerald-500/20 flex items-center justify-center gap-2"
-          onClick={(e) => { e.stopPropagation(); onViewProfile(); }}
+          onClick={(e) => { e.stopPropagation(); }}
         >
           <span className="material-symbols-outlined text-[18px]">visibility</span>
           View Full Profile
-        </button>
+        </Link>
         <button
           className="flex-shrink-0 w-10 h-10 rounded-xl border border-border/60 bg-white hover:bg-muted/40 transition-colors flex items-center justify-center text-muted-foreground hover:text-foreground"
           onClick={(e) => { e.stopPropagation(); }}
