@@ -189,11 +189,11 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
             className="relative"
           >
-            <div className="rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="rounded-[2.5rem] overflow-hidden shadow-2xl max-h-[600px]">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuxhTTGlwKJT9DunGvOuzsRBOtoieeDBevDyZd7gPWKPypBairiYeRWMaBSa3euzkt5MczSJ6fDhh2CUASLX_3uYLQkJYZh5myet8LH4mI94Ecbp9ZOut5CeV6L6SrFiHgOND8nFdBhmziiLVMTs94GGa1FDwMFSQiaPB9PS-t3veB3T0hIsDNbMN7lMfsFIJBrd6CoICjVh6-xvruNZ1cR6C_jlu7SpvEK5kWS42e_KtonadnplL45vJ-GbVBXaNzCWfvD5R8hVc"
+                src="/hero-guy.png"
                 alt="Verified professional on Vouch platform"
-                className="w-full h-auto object-cover"
+                className="w-full h-[600px] object-cover object-top"
               />
             </div>
 
