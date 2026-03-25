@@ -251,7 +251,7 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="font-[var(--font-headline)] text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-              The Candidate Sanctuary
+              The Candidate Space
             </h2>
             <p className="mt-4 text-muted-foreground max-w-xl mx-auto text-lg">
               Everything you need to stand out, verified and ready.
