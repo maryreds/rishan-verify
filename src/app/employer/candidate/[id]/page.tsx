@@ -17,79 +17,82 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
     .eq("id", id)
     .single();
 
-  if (!profile) {
-    notFound();
+  // ── Demo / fallback mock data when no real profile found ──
+  const isDemo = !profile;
+  const demoProfile = {
+    id: "demo",
+    full_name: "Elena Rodriguez",
+    headline: "Senior Product Designer & Systems Architect",
+    summary: "Passionate design leader with 12+ years of experience architecting scalable design systems for high-growth startups. Led cross-functional teams at Stripe and Airbnb, reducing user onboarding friction by 40%. Expert in accessibility, localization, and human-centric product strategy.",
+    location: "San Francisco, CA",
+    verification_status: "verified",
+    vouch_score: 89,
+    photo_original_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuA5jjiWBymtwfbmMkI1_9m9jFdmDioNzp6zyPqhdupuaF90Rvobdwhfhha0dcvrBRUrqhP_gw6dix-67n5Qv0tGrq6swj6Xp-k34U2gZud4V7odqKdFHhtsgS_kOdWubMQjakgq7CeRuv6zQyz9KI3yIk7FDBj0coHVlH68kC09XqS9-qpD79fGfbYRYWS9aOv9GEcPtlZrkCyjAgRx4iKmrDcJeAz2WeODnnZpjiqJluoKInvAgslnXe2uhrwteVaztm4TgK29ghs",
+    skills: ["Design Systems", "Product Strategy", "UX Research", "Figma", "React", "Accessibility"],
+  };
+  const p = profile ?? demoProfile;
+
+  // ── Parallel data fetches (skip for demo) ──
+  let experience: any[] = [];
+  let education: any[] = [];
+  let skills: any[] = [];
+  let latestVerification: any = null;
+  let peerVouches: any[] = [];
+  let portfolioItems: any[] = [];
+  let assessments: any[] = [];
+  let credentials: any[] = [];
+  let completedRefs: any[] = [];
+
+  if (!isDemo) {
+    const [r1, r2, r3, r4, r5, r6, r7, r8, r9] = await Promise.all([
+      supabase.from("work_experience").select("*").eq("profile_id", p.id).order("start_date", { ascending: false }),
+      supabase.from("education").select("*").eq("profile_id", p.id).order("start_date", { ascending: false }),
+      supabase.from("skills").select("*").eq("profile_id", p.id),
+      supabase.from("verification_requests").select("immigration_status, status_valid_until, reviewed_at").eq("profile_id", p.id).eq("status", "completed").order("reviewed_at", { ascending: false }).limit(1).single(),
+      supabase.from("peer_vouches").select("*, voucher:voucher_id(full_name, photo_original_url, headline)").eq("vouchee_id", p.id).eq("status", "accepted"),
+      supabase.from("portfolio_items").select("*").eq("profile_id", p.id).order("sort_order", { ascending: true }),
+      supabase.from("assessments").select("skill_name, score, max_score").eq("profile_id", p.id).eq("status", "completed"),
+      supabase.from("credentials").select("*").eq("profile_id", p.id).order("created_at", { ascending: false }),
+      supabase.from("references").select("*").eq("profile_id", p.id).eq("status", "completed"),
+    ]);
+    experience = r1.data ?? [];
+    education = r2.data ?? [];
+    skills = r3.data ?? [];
+    latestVerification = r4.data;
+    peerVouches = r5.data ?? [];
+    portfolioItems = r6.data ?? [];
+    assessments = r7.data ?? [];
+    credentials = r8.data ?? [];
+    completedRefs = r9.data ?? [];
+  } else {
+    // Demo mock data
+    experience = [
+      { id: "1", company: "Nexus Health Tech", title: "Lead Product Designer", start_date: "2020-03-01", end_date: null, description: "Spearheaded the redesign of the core patient management system, reducing task completion time by 40%. Managed a team of 6 designers across 3 time zones." },
+      { id: "2", company: "Global FinStream", title: "Senior UX Architect", start_date: "2017-06-01", end_date: "2020-02-28", description: "Architected a cross-platform design token system that synchronized web, iOS, and Android development cycles." },
+    ];
+    education = [
+      { id: "1", institution: "Stanford University", degree: "M.S. Human-Computer Interaction", start_date: "2015-09-01", end_date: "2017-06-01" },
+    ];
+    peerVouches = [
+      { id: "1", skill: "Interaction Design", message: "Elena has a rare ability to simplify complex user flows into elegant solutions.", voucher: { full_name: "David Chen", headline: "CTO @ Nexus Health", photo_original_url: null } },
+      { id: "2", skill: "Leadership", message: "The rare designer who actually understands the constraints of code while pushing for visual perfection.", voucher: { full_name: "Sarah Jenkins", headline: "Product Lead @ FinStream", photo_original_url: null } },
+    ];
+    assessments = [
+      { skill_name: "Design Systems", score: 95, max_score: 100 },
+      { skill_name: "Product Strategy", score: 90, max_score: 100 },
+      { skill_name: "UX Research", score: 82, max_score: 100 },
+      { skill_name: "Front-end Dev", score: 65, max_score: 100 },
+    ];
   }
 
-  // ── Parallel data fetches ──
-  const [
-    { data: experience },
-    { data: education },
-    { data: skills },
-    { data: latestVerification },
-    { data: peerVouches },
-    { data: portfolioItems },
-    { data: assessments },
-    { data: credentials },
-    { data: completedRefs },
-  ] = await Promise.all([
-    supabase
-      .from("work_experience")
-      .select("*")
-      .eq("profile_id", profile.id)
-      .order("start_date", { ascending: false }),
-    supabase
-      .from("education")
-      .select("*")
-      .eq("profile_id", profile.id)
-      .order("start_date", { ascending: false }),
-    supabase
-      .from("skills")
-      .select("*")
-      .eq("profile_id", profile.id),
-    supabase
-      .from("verification_requests")
-      .select("immigration_status, status_valid_until, reviewed_at")
-      .eq("profile_id", profile.id)
-      .eq("status", "completed")
-      .order("reviewed_at", { ascending: false })
-      .limit(1)
-      .single(),
-    supabase
-      .from("peer_vouches")
-      .select("*, voucher:voucher_id(full_name, photo_original_url, headline)")
-      .eq("vouchee_id", profile.id)
-      .eq("status", "accepted"),
-    supabase
-      .from("portfolio_items")
-      .select("*")
-      .eq("profile_id", profile.id)
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("assessments")
-      .select("skill_name, score, max_score")
-      .eq("profile_id", profile.id)
-      .eq("status", "completed"),
-    supabase
-      .from("credentials")
-      .select("*")
-      .eq("profile_id", profile.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("references")
-      .select("*")
-      .eq("profile_id", profile.id)
-      .eq("status", "completed"),
-  ]);
-
-  const isVerified = profile.verification_status === "verified";
-  const vouchScore = profile.vouch_score || 0;
-  const vouchScoreScaled = Math.round(vouchScore * 10); // 0-100 -> 0-1000 for display
+  const isVerified = p.verification_status === "verified";
+  const vouchScore = p.vouch_score || 0;
+  const vouchScoreScaled = Math.round(vouchScore * 10);
 
   // Merge skills from both tables
   const allSkills = [
     ...(skills?.map((s: { name: string }) => s.name) || []),
-    ...(profile.skills || []),
+    ...(p.skills || []),
   ].filter((v: string, i: number, a: string[]) => a.indexOf(v) === i);
 
   // Map verified skills from assessments
@@ -117,7 +120,7 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
   ).filter(Boolean) || [];
 
   const currentRole = experience?.[0];
-  const candidateName = profile.full_name || "Candidate";
+  const candidateName = p.full_name || "Candidate";
   const firstName = candidateName.split(" ")[0];
 
   return (
@@ -261,9 +264,9 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
           <section className="flex flex-col md:flex-row items-start gap-6 mb-10">
             {/* Photo */}
             <div className="relative flex-shrink-0">
-              {profile.photo_original_url || profile.avatar_url ? (
+              {p.photo_original_url || p.avatar_url ? (
                 <img
-                  src={profile.photo_original_url || profile.avatar_url}
+                  src={p.photo_original_url || p.avatar_url}
                   alt={candidateName}
                   className="w-24 h-24 rounded-3xl object-cover border-2 border-border shadow-lg"
                 />
@@ -290,25 +293,25 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
                 )}
               </div>
 
-              {profile.headline && (
-                <p className="text-lg text-muted-foreground">{profile.headline}</p>
+              {p.headline && (
+                <p className="text-lg text-muted-foreground">{p.headline}</p>
               )}
 
               {/* Tags */}
               <div className="flex flex-wrap items-center gap-2">
-                {profile.remote_preference && (
+                {p.remote_preference && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold tracking-wider uppercase">
                     <span className="material-symbols-outlined text-sm">wifi</span>
                     REMOTE FIRST
                   </span>
                 )}
-                {profile.notice_period && (
+                {p.notice_period && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold tracking-wider uppercase">
                     <span className="material-symbols-outlined text-sm">schedule</span>
-                    {profile.notice_period}
+                    {p.notice_period}
                   </span>
                 )}
-                {!profile.remote_preference && !profile.notice_period && (
+                {!p.remote_preference && !p.notice_period && (
                   <>
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold tracking-wider uppercase">
                       <span className="material-symbols-outlined text-sm">wifi</span>
@@ -320,10 +323,10 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
                     </span>
                   </>
                 )}
-                {profile.location && (
+                {p.location && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium">
                     <span className="material-symbols-outlined text-sm">location_on</span>
-                    {profile.location}
+                    {p.location}
                   </span>
                 )}
               </div>
