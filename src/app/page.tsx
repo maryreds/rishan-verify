@@ -193,7 +193,7 @@ export default function HomePage() {
               <img
                 src="/hero-guy.png"
                 alt="Verified professional on Vouch platform"
-                className="w-full h-[600px] object-cover object-top"
+                className="w-full h-[600px] object-cover object-[center_15%]"
               />
             </div>
 
