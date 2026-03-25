@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
-import DashboardClient from "./dashboard-client";
+import DashboardOverview from "./overview-client";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -39,7 +39,6 @@ export default async function DashboardPage() {
     .limit(1)
     .single();
 
-  // Get profile view count — graceful fallback if table doesn't exist yet
   let profileViewCount = 0;
   try {
     const { count } = await supabase
@@ -52,7 +51,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <DashboardClient
+    <DashboardOverview
       user={user}
       profile={profile}
       experience={experience ?? []}

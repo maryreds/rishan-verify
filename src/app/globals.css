@@ -3,47 +3,66 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Vouch brand: warm teal + amber — trust-forward, not corporate blue */
-  --color-background: #FDFCFB;
-  --color-foreground: #1A1A1A;
-  --color-card: #FFFFFF;
-  --color-card-foreground: #1A1A1A;
-  --color-popover: #FFFFFF;
-  --color-popover-foreground: #1A1A1A;
-  --color-primary: #0D7C66;
-  --color-primary-foreground: #FFFFFF;
-  --color-secondary: #F5F0EB;
-  --color-secondary-foreground: #1A1A1A;
-  --color-muted: #F0ECE7;
-  --color-muted-foreground: #6B6560;
-  --color-accent: #E8A838;
-  --color-accent-foreground: #1A1A1A;
-  --color-destructive: #DC3545;
-  --color-border: #E8E2DB;
-  --color-input: #E8E2DB;
-  --color-ring: #0D7C66;
+  /* Vouch brand: verdant green — trust-forward, human-centric */
+  --color-background: #faf9f5;
+  --color-foreground: #1b1c1a;
+  --color-card: #ffffff;
+  --color-card-foreground: #1b1c1a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1b1c1a;
+  --color-primary: #265140;
+  --color-primary-foreground: #ffffff;
+  --color-primary-container: #3e6957;
+  --color-primary-fixed: #beedd6;
+  --color-primary-fixed-dim: #a2d1bb;
+  --color-secondary: #3e6658;
+  --color-secondary-foreground: #ffffff;
+  --color-secondary-container: #c0ecda;
+  --color-muted: #f5f4f0;
+  --color-muted-foreground: #414944;
+  --color-accent: #394d49;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ba1a1a;
+  --color-border: #c0c8c2;
+  --color-input: #e3e2df;
+  --color-ring: #265140;
 
   /* Vouch semantic tokens */
-  --color-vouch-verified: #0D7C66;
-  --color-vouch-score: #E8A838;
+  --color-vouch-verified: #265140;
+  --color-vouch-score: #3e6957;
   --color-vouch-signal: #7C5CFC;
 
-  --color-chart-1: #0D7C66;
-  --color-chart-2: #E8A838;
+  /* Surface system */
+  --color-surface: #faf9f5;
+  --color-surface-dim: #dbdad6;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f5f4f0;
+  --color-surface-container: #efeeea;
+  --color-surface-container-high: #e9e8e4;
+  --color-surface-container-highest: #e3e2df;
+
+  /* Tertiary */
+  --color-tertiary: #394d49;
+  --color-tertiary-container: #506560;
+  --color-tertiary-fixed: #d0e7e1;
+
+  --color-chart-1: #265140;
+  --color-chart-2: #3e6957;
   --color-chart-3: #7C5CFC;
-  --color-chart-4: #DC3545;
-  --color-chart-5: #2DD4A8;
-  --color-sidebar: #F5F0EB;
-  --color-sidebar-foreground: #1A1A1A;
-  --color-sidebar-primary: #0D7C66;
-  --color-sidebar-primary-foreground: #FFFFFF;
-  --color-sidebar-accent: #F0ECE7;
-  --color-sidebar-accent-foreground: #1A1A1A;
-  --color-sidebar-border: #E8E2DB;
-  --color-sidebar-ring: #0D7C66;
+  --color-chart-4: #ba1a1a;
+  --color-chart-5: #a2d1bb;
+  --color-sidebar: #f5f4f0;
+  --color-sidebar-foreground: #1b1c1a;
+  --color-sidebar-primary: #265140;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #efeeea;
+  --color-sidebar-accent-foreground: #1b1c1a;
+  --color-sidebar-border: #c0c8c2;
+  --color-sidebar-ring: #265140;
   --radius: 0.625rem;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-headline: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark {
@@ -53,36 +72,38 @@
   --color-card-foreground: #F5F0EB;
   --color-popover: #1A1816;
   --color-popover-foreground: #F5F0EB;
-  --color-primary: #2DD4A8;
-  --color-primary-foreground: #0F0E0D;
-  --color-secondary: #1E1C1A;
-  --color-secondary-foreground: #F5F0EB;
+  --color-primary: #a2d1bb;
+  --color-primary-foreground: #002116;
+  --color-primary-container: #3e6957;
+  --color-secondary: #a5d0be;
+  --color-secondary-foreground: #002117;
+  --color-secondary-container: #264e41;
   --color-muted: #1E1C1A;
   --color-muted-foreground: #9B9590;
-  --color-accent: #F0B952;
-  --color-accent-foreground: #0F0E0D;
+  --color-accent: #b5cbc6;
+  --color-accent-foreground: #0a1f1c;
   --color-destructive: #F87171;
   --color-border: #2A2725;
   --color-input: #2A2725;
-  --color-ring: #2DD4A8;
+  --color-ring: #a2d1bb;
 
-  --color-vouch-verified: #2DD4A8;
-  --color-vouch-score: #F0B952;
+  --color-vouch-verified: #a2d1bb;
+  --color-vouch-score: #3e6957;
   --color-vouch-signal: #A78BFA;
 
-  --color-chart-1: #2DD4A8;
-  --color-chart-2: #F0B952;
+  --color-chart-1: #a2d1bb;
+  --color-chart-2: #3e6957;
   --color-chart-3: #A78BFA;
   --color-chart-4: #F87171;
-  --color-chart-5: #0D7C66;
+  --color-chart-5: #265140;
   --color-sidebar: #1E1C1A;
   --color-sidebar-foreground: #F5F0EB;
-  --color-sidebar-primary: #2DD4A8;
-  --color-sidebar-primary-foreground: #0F0E0D;
+  --color-sidebar-primary: #a2d1bb;
+  --color-sidebar-primary-foreground: #002116;
   --color-sidebar-accent: #2A2725;
   --color-sidebar-accent-foreground: #F5F0EB;
   --color-sidebar-border: #2A2725;
-  --color-sidebar-ring: #2DD4A8;
+  --color-sidebar-ring: #a2d1bb;
 }
 
 @layer base {
@@ -93,6 +114,29 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+/* Glass effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+}
+
+/* Vouch gradient */
+.vouch-gradient {
+  background: linear-gradient(135deg, #265140 0%, #3e6957 100%);
 }
 
 .scrollbar-hide::-webkit-scrollbar {
