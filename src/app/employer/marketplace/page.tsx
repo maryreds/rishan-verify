@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Bookmark,
@@ -422,6 +423,7 @@ const PILLAR_CONFIG = [
 // ---------------------------------------------------------------------------
 
 export default function EmployerMarketplacePage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [skillFilter, setSkillFilter] = useState("all");
@@ -696,7 +698,7 @@ export default function EmployerMarketplacePage() {
                         candidate={candidate}
                         isSaved={savedIds.includes(candidate.id)}
                         onToggleSave={() => toggleSave(candidate.id)}
-                        onViewProfile={() => openDetail(candidate)}
+                        onViewProfile={() => router.push(`/employer/candidate/${candidate.id}`)}
                       />
                     ))}
                   </div>

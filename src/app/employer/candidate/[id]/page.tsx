@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
+import { LogoutButton } from "@/components/logout-button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -146,18 +147,10 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              Sign Up
-            </Link>
+            <LogoutButton className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-lg">logout</span>
+              Log Out
+            </LogoutButton>
           </div>
         </div>
       </nav>
@@ -236,10 +229,10 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
             <span className="material-symbols-outlined text-xl">settings</span>
             Settings
           </button>
-          <button className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full text-left">
+          <LogoutButton className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full text-left">
             <span className="material-symbols-outlined text-xl">logout</span>
-            Logout
-          </button>
+            Log Out
+          </LogoutButton>
         </div>
       </aside>
 
@@ -249,14 +242,24 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
       <main className="lg:ml-64 pt-24 pb-16 px-6 lg:px-10">
         <div className="max-w-[1200px] mx-auto">
 
-          {/* ── Back link ── */}
-          <Link
-            href="/employer/marketplace"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
-          >
-            <span className="material-symbols-outlined text-lg">arrow_back</span>
-            Back to Marketplace
-          </Link>
+          {/* ── Breadcrumb navigation ── */}
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
+            <Link
+              href="/"
+              className="hover:text-foreground transition-colors"
+            >
+              Vouch
+            </Link>
+            <span className="material-symbols-outlined text-base">chevron_right</span>
+            <Link
+              href="/employer/marketplace"
+              className="hover:text-foreground transition-colors"
+            >
+              Marketplace
+            </Link>
+            <span className="material-symbols-outlined text-base">chevron_right</span>
+            <span className="text-foreground font-medium">{candidateName}</span>
+          </nav>
 
           {/* ══════════════════════════════════════════════════════════════
               HEADER
