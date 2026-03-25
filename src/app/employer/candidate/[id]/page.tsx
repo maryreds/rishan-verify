@@ -27,7 +27,7 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
     location: "San Francisco, CA",
     verification_status: "verified",
     vouch_score: 89,
-    photo_original_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuA5jjiWBymtwfbmMkI1_9m9jFdmDioNzp6zyPqhdupuaF90Rvobdwhfhha0dcvrBRUrqhP_gw6dix-67n5Qv0tGrq6swj6Xp-k34U2gZud4V7odqKdFHhtsgS_kOdWubMQjakgq7CeRuv6zQyz9KI3yIk7FDBj0coHVlH68kC09XqS9-qpD79fGfbYRYWS9aOv9GEcPtlZrkCyjAgRx4iKmrDcJeAz2WeODnnZpjiqJluoKInvAgslnXe2uhrwteVaztm4TgK29ghs",
+    photo_original_url: "https://randomuser.me/api/portraits/women/68.jpg",
     skills: ["Design Systems", "Product Strategy", "UX Research", "Figma", "React", "Accessibility"],
   };
   const p = profile ?? demoProfile;

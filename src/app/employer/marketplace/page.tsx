@@ -109,7 +109,20 @@ interface Candidate {
 // Placeholder candidate data
 // ---------------------------------------------------------------------------
 
-const PLACEHOLDER_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuA5jjiWBymtwfbmMkI1_9m9jFdmDioNzp6zyPqhdupuaF90Rvobdwhfhha0dcvrBRUrqhP_gw6dix-67n5Qv0tGrq6swj6Xp-k34U2gZud4V7odqKdFHhtsgS_kOdWubMQjakgq7CeRuv6zQyz9KI3yIk7FDBj0coHVlH68kC09XqS9-qpD79fGfbYRYWS9aOv9GEcPtlZrkCyjAgRx4iKmrDcJeAz2WeODnnZpjiqJluoKInvAgslnXe2uhrwteVaztm4TgK29ghs";
+const PLACEHOLDER_AVATARS = [
+  "https://randomuser.me/api/portraits/women/44.jpg",   // Priya
+  "https://randomuser.me/api/portraits/men/32.jpg",      // Marcus
+  "https://randomuser.me/api/portraits/women/65.jpg",    // Sofia
+  "https://randomuser.me/api/portraits/men/75.jpg",      // Arjun
+  "https://randomuser.me/api/portraits/women/90.jpg",    // Aisha
+  "https://randomuser.me/api/portraits/women/26.jpg",    // Jenny
+  "https://randomuser.me/api/portraits/men/46.jpg",      // Ryan
+  "https://randomuser.me/api/portraits/women/55.jpg",    // Natalia
+  "https://randomuser.me/api/portraits/men/22.jpg",      // Kevin
+  "https://randomuser.me/api/portraits/women/72.jpg",    // Imani
+  "https://randomuser.me/api/portraits/women/33.jpg",    // Rachel
+  "https://randomuser.me/api/portraits/men/64.jpg",      // Vikram
+];
 
 const PLACEHOLDER_CANDIDATES: Candidate[] = [
   {
@@ -121,7 +134,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "8+ years building scalable web applications with React, Node.js, and AWS. Passionate about clean architecture and mentoring junior engineers. Led a team of 6 at Zenith Labs through a full platform rewrite that improved performance by 40%.",
     location: "Dallas, TX",
     skills: ["React", "TypeScript", "Node.js", "AWS", "PostgreSQL", "GraphQL", "Docker"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[0],
     verification_status: "verified",
     verified_at: "2026-02-15",
     verification_expires_at: "2027-02-15",
@@ -146,7 +159,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "10 years of backend engineering with expertise in distributed systems and cloud infrastructure. Built payment processing systems handling $500M+ annually. Strong background in system design and performance optimization.",
     location: "Atlanta, GA",
     skills: ["Java", "Spring Boot", "Kubernetes", "AWS", "Kafka", "PostgreSQL", "Terraform"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[1],
     verification_status: "verified",
     verified_at: "2026-01-20",
     verification_expires_at: "2027-01-20",
@@ -169,7 +182,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Award-winning product designer with 7 years of experience. Specialize in design systems, accessibility, and user research. Reduced onboarding drop-off by 35% at Meridian through research-driven redesign.",
     location: "Austin, TX",
     skills: ["Figma", "Design Systems", "User Research", "Prototyping", "Accessibility", "HTML/CSS", "React"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[2],
     verification_status: "verified",
     verified_at: "2026-03-01",
     verification_expires_at: "2027-03-01",
@@ -192,7 +205,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "12 years in infrastructure and cloud engineering. AWS Solutions Architect Professional certified. Migrated 200+ services to Kubernetes, reducing infrastructure costs by 45%. Speaker at KubeCon 2025.",
     location: "San Jose, CA",
     skills: ["AWS", "Kubernetes", "Terraform", "Python", "CI/CD", "Docker", "Linux", "Ansible"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[3],
     verification_status: "verified",
     verified_at: "2026-02-28",
     verification_expires_at: "2027-02-28",
@@ -215,7 +228,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Creative product designer with a background in human-computer interaction. 5 years designing consumer and enterprise products. Focused on inclusive design and building delightful user experiences.",
     location: "Chicago, IL",
     skills: ["Figma", "Prototyping", "User Research", "Interaction Design", "Sketch", "Storyboarding"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[4],
     verification_status: "verified",
     verified_at: "2026-03-10",
     verification_expires_at: "2027-03-10",
@@ -238,7 +251,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "6 years in data science and machine learning. Built recommendation engines, fraud detection models, and NLP pipelines. Published researcher with 3 papers in top-tier conferences.",
     location: "New York, NY",
     skills: ["Python", "PyTorch", "SQL", "Spark", "NLP", "Computer Vision", "MLOps", "Airflow"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[5],
     verification_status: "verified",
     verified_at: "2026-02-01",
     verification_expires_at: "2027-02-01",
@@ -261,7 +274,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Machine learning engineer specializing in production ML systems. Built and deployed models serving 100M+ predictions/day. Strong background in MLOps, model monitoring, and A/B testing infrastructure.",
     location: "Seattle, WA",
     skills: ["Python", "TensorFlow", "Kubernetes", "Go", "MLOps", "Feature Stores", "A/B Testing"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[6],
     verification_status: "verified",
     verified_at: "2026-01-15",
     verification_expires_at: "2027-01-15",
@@ -284,7 +297,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Engineering leader with 10+ years of experience, 5 in management. Scaled teams from 4 to 20 engineers. Track record of shipping complex features on time while maintaining high team satisfaction scores.",
     location: "Houston, TX",
     skills: ["Team Leadership", "Agile", "System Design", "Java", "React", "Project Management", "Mentoring"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[7],
     verification_status: "verified",
     verified_at: "2026-03-05",
     verification_expires_at: "2027-03-05",
@@ -307,7 +320,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Solutions architect bridging business and engineering. 9 years designing enterprise integrations, API platforms, and migration strategies. AWS and Azure certified.",
     location: "Dallas, TX",
     skills: ["AWS", "Azure", "Solution Design", "API Design", "Microservices", "Enterprise Integration", "SQL Server"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[8],
     verification_status: "verified",
     verified_at: "2026-02-20",
     verification_expires_at: "2027-02-20",
@@ -330,7 +343,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Security-focused DevOps engineer with 6 years hardening CI/CD pipelines and cloud infrastructure. Built security automation that reduced vulnerability remediation time from 14 days to 48 hours.",
     location: "Washington, DC",
     skills: ["Security", "AWS", "Terraform", "Python", "Docker", "SAST/DAST", "Compliance", "CI/CD"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[9],
     verification_status: "verified",
     verified_at: "2026-03-12",
     verification_expires_at: "2027-03-12",
@@ -353,7 +366,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Frontend specialist with 5 years building accessible, performant web applications. Core contributor to an open-source component library with 8K+ GitHub stars.",
     location: "Portland, OR",
     skills: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Accessibility", "Performance", "Storybook"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[10],
     verification_status: "verified",
     verified_at: "2026-02-10",
     verification_expires_at: "2027-02-10",
@@ -376,7 +389,7 @@ const PLACEHOLDER_CANDIDATES: Candidate[] = [
       "Versatile full-stack engineer comfortable across the entire stack. 7 years shipping production features in fast-paced startups. Strong communicator who thrives in cross-functional teams.",
     location: "San Francisco, CA",
     skills: ["TypeScript", "React", "Node.js", "Python", "PostgreSQL", "Redis", "Docker", "GCP"],
-    avatar_url: PLACEHOLDER_AVATAR,
+    avatar_url: PLACEHOLDER_AVATARS[11],
     verification_status: "verified",
     verified_at: "2026-01-25",
     verification_expires_at: "2027-01-25",
