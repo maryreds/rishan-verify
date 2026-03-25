@@ -52,28 +52,37 @@ export default function DashboardOverview({
     if (!file) return;
     setUploadingHeadshot(true);
 
-    const filePath = `${user.id}/headshot-${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("photos").upload(filePath, file);
-    if (error) {
-      toast.error("Upload failed", { description: error.message });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/profile/upload-photo", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error("Upload failed", { description: data.error || "Unknown error" });
+        setUploadingHeadshot(false);
+        return;
+      }
+
+      setHeadshot(data.url);
       setUploadingHeadshot(false);
-      return;
+      toast.success("Headshot uploaded!");
+
+      fetch("/api/profile/vouch-score", { method: "POST" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d?.total != null) setVouchScore(d.total);
+        })
+        .catch(() => {});
+    } catch (err: any) {
+      toast.error("Upload failed", { description: err.message });
+      setUploadingHeadshot(false);
     }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("photos").getPublicUrl(filePath);
-    await supabase.from("profiles").update({ photo_original_url: publicUrl }).eq("id", user.id);
-    setHeadshot(publicUrl);
-    setUploadingHeadshot(false);
-    toast.success("Headshot uploaded!");
-
-    fetch("/api/profile/vouch-score", { method: "POST" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.total != null) setVouchScore(data.total);
-      })
-      .catch(() => {});
   }
 
   const publicUrl = profile?.vanity_slug
