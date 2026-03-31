@@ -24,9 +24,10 @@ const bottomItems = [
 interface DashboardSidebarProps {
   userName: string;
   vouchScore: number;
+  photoUrl: string | null;
 }
 
-export function DashboardSidebar({ userName, vouchScore }: DashboardSidebarProps) {
+export function DashboardSidebar({ userName, vouchScore, photoUrl }: DashboardSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -40,9 +41,17 @@ export function DashboardSidebar({ userName, vouchScore }: DashboardSidebarProps
 
       {/* User Profile Section */}
       <div className="mb-8 flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
-          <span className="material-symbols-outlined text-on-primary-container text-xl">person</span>
-        </div>
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt={userName}
+            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-on-primary-container text-xl">person</span>
+          </div>
+        )}
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
           <p className="text-xs text-muted-foreground">Vouch Score: {vouchScore}</p>
