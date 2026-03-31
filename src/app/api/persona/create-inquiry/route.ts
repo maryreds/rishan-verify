@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
-import { createInquiry } from "@/lib/persona";
+import { createInquiry, resumeInquiry } from "@/lib/persona";
 
 export async function POST(request: Request) {
   if (!process.env.PERSONA_API_KEY) {
@@ -26,19 +26,24 @@ export async function POST(request: Request) {
 
   try {
     const { origin } = new URL(request.url);
-    const redirectUri = `${origin}/dashboard?tab=verify`;
+    const body = await request.json().catch(() => ({}));
+    const returnTo = body?.returnTo || "/dashboard/verify";
+    const redirectUri = `${origin}${returnTo}`;
 
     const response = await createInquiry(user.id, redirectUri);
 
     const inquiryId = response.data?.id;
-    const sessionUrl =
-      response.meta?.sessionToken
-        ? `https://withpersona.com/verify?inquiry-id=${inquiryId}&session-token=${response.meta.sessionToken}`
-        : null;
 
     if (!inquiryId) {
       throw new Error("No inquiry ID returned from Persona");
     }
+
+    // Resume the inquiry to get a session token for the embedded SDK
+    const { sessionToken } = await resumeInquiry(inquiryId);
+
+    const sessionUrl = sessionToken
+      ? `https://withpersona.com/verify?inquiry-id=${inquiryId}&session-token=${sessionToken}`
+      : null;
 
     // Upsert a verification_requests record with the persona inquiry ID
     const { error: upsertError } = await supabase
@@ -72,9 +77,13 @@ export async function POST(request: Request) {
       target_id: inquiryId,
     });
 
+    const isSandbox = process.env.PERSONA_API_KEY?.includes("_sandbox_") ?? false;
+
     return NextResponse.json({
       inquiryId,
+      sessionToken: sessionToken || null,
       sessionUrl,
+      sandbox: isSandbox,
     });
   } catch (err) {
     console.error("Persona create inquiry error:", err);

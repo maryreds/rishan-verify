@@ -22,6 +22,7 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const role = searchParams.get("role") || "candidate";
+  const refCode = searchParams.get("ref");
   const supabase = createClient();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -53,10 +54,35 @@ function SignupForm() {
       return;
     }
 
-    toast.success("Account created!", {
-      description: "Check your email for a confirmation link.",
+    // Track referral if a code was provided
+    if (refCode) {
+      try {
+        await fetch("/api/referrals/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referralCode: refCode }),
+        });
+      } catch {
+        // Referral tracking is best-effort; don't block signup
+      }
+    }
+
+    // Attempt to auto-login and redirect to onboarding
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-    router.push("/login");
+
+    if (signInError) {
+      // Email confirmation is likely required — fall back to login flow
+      toast.success("Account created!", {
+        description: "Check your email for a confirmation link.",
+      });
+      router.push("/login");
+    } else {
+      toast.success("Welcome! Let's set up your profile.");
+      router.push("/onboarding");
+    }
   }
 
   return (

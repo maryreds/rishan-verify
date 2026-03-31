@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Onboarding redirect: if user hits /dashboard and hasn't completed onboarding
-  if (user && pathname === "/dashboard") {
+  if (user && (pathname === "/dashboard" || pathname.startsWith("/dashboard/"))) {
     try {
       const { data: profile } = await supabase
         .from("profiles")

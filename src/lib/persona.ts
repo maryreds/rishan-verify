@@ -57,3 +57,28 @@ export async function getInquiry(inquiryId: string): Promise<PersonaInquiry> {
   const data = await res.json()
   return data.data
 }
+
+/**
+ * Resume an existing inquiry to get a session token for the embedded SDK.
+ * This is required because the initial create call doesn't return a session token.
+ */
+export async function resumeInquiry(inquiryId: string): Promise<{ sessionToken: string }> {
+  const res = await fetch(`${PERSONA_API_BASE}/inquiries/${inquiryId}/resume`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${PERSONA_API_KEY}`,
+      'Content-Type': 'application/json',
+      'Persona-Version': '2023-01-05',
+      'Key-Inflection': 'camel',
+    },
+    body: JSON.stringify({}),
+  })
+
+  if (!res.ok) {
+    const error = await res.text()
+    throw new Error(`Persona resume error: ${res.status} ${error}`)
+  }
+
+  const data = await res.json()
+  return { sessionToken: data.meta?.sessionToken }
+}

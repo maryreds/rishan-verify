@@ -21,7 +21,12 @@ const bottomItems = [
   { href: "/logout", label: "Logout", icon: "logout" },
 ];
 
-export function DashboardSidebar() {
+interface DashboardSidebarProps {
+  userName: string;
+  vouchScore: number;
+}
+
+export function DashboardSidebar({ userName, vouchScore }: DashboardSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -39,8 +44,8 @@ export function DashboardSidebar() {
           <span className="material-symbols-outlined text-on-primary-container text-xl">person</span>
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate">Alex Rivers</p>
-          <p className="text-xs text-muted-foreground">Vouch Score: 840</p>
+          <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
+          <p className="text-xs text-muted-foreground">Vouch Score: {vouchScore}</p>
         </div>
       </div>
 

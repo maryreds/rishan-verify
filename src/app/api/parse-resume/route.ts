@@ -69,24 +69,21 @@ async function callGemini(parts: Record<string, unknown>[]): Promise<GeminiParse
 // ---------- Text extraction ----------
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+  // Primary: use unpdf (works reliably in Node/serverless/Turbopack)
   try {
-    const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const { extractText } = await import("unpdf");
     const uint8 = new Uint8Array(buffer);
-    const doc = await pdfjsLib.getDocument({ data: uint8, useSystemFonts: true }).promise;
-    const pages: string[] = [];
-    for (let i = 1; i <= doc.numPages; i++) {
-      const page = await doc.getPage(i);
-      const content = await page.getTextContent();
-      const strings = content.items
-        .filter((item: Record<string, unknown>) => "str" in item)
-        .map((item: Record<string, unknown>) => item.str as string);
-      pages.push(strings.join(" "));
+    const result = await extractText(uint8);
+    const text = Array.isArray(result.text) ? result.text.join("\n") : result.text;
+    if (text && text.trim().length > 20) {
+      console.log(`PDF: extracted ${text.trim().length} chars via unpdf`);
+      return text.trim();
     }
-    return pages.join("\n\n").trim();
   } catch (e) {
-    console.error("pdfjs extraction failed:", e);
-    return "";
+    console.error("unpdf extraction failed:", e);
   }
+
+  return "";
 }
 
 async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
@@ -153,17 +150,22 @@ export async function POST(request: Request) {
           );
         }
 
-        // Design-tool PDF: send as base64
-        console.log("PDF: no text extracted, sending as base64");
-        const base64 = buffer.toString("base64");
-        if (useOpenAI()) {
-          return NextResponse.json(await parseResumeFromImage(base64, "application/pdf"));
+        // Design-tool / scanned PDF: no extractable text
+        console.log("PDF: no text extracted, trying as image");
+        if (!useOpenAI()) {
+          // Gemini can handle PDF base64 natively
+          const base64 = buffer.toString("base64");
+          return NextResponse.json(
+            await callGemini([
+              { inlineData: { mimeType: "application/pdf", data: base64 } },
+              { text: PARSE_PROMPT },
+            ])
+          );
         }
+        // OpenAI vision only supports image types — return helpful error
         return NextResponse.json(
-          await callGemini([
-            { inlineData: { mimeType: "application/pdf", data: base64 } },
-            { text: PARSE_PROMPT },
-          ])
+          { error: "Could not extract text from this PDF. It may be a scanned image. Please try uploading a text-based PDF, DOCX, or TXT file instead." },
+          { status: 422 }
         );
       }
 

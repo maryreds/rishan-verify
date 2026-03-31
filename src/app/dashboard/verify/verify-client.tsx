@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   BadgeCheck,
   Camera,
@@ -23,6 +24,11 @@ import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import type { Profile, VerificationRequest } from "@/lib/types";
 
+const PersonaInline = dynamic(
+  () => import("@/components/vouch/persona-inline"),
+  { ssr: false }
+);
+
 interface VerifyClientProps {
   user: User;
   profile: Profile | null;
@@ -39,8 +45,26 @@ export default function VerifyClient({
 
   const [uploadingVerification, setUploadingVerification] = useState(false);
   const [startingPersona, setStartingPersona] = useState(false);
+  const [showPersonaInline, setShowPersonaInline] = useState(false);
+  const [personaSession, setPersonaSession] = useState<{
+    inquiryId: string;
+    sessionToken: string;
+    sandbox: boolean;
+  } | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Work Auth state
+  const [showWorkAuthForm, setShowWorkAuthForm] = useState(false);
+  const [workAuthType, setWorkAuthType] = useState(
+    latestVerification?.immigration_status || ""
+  );
+  const [workAuthExpiry, setWorkAuthExpiry] = useState(
+    latestVerification?.status_valid_until || ""
+  );
+  const [uploadingWorkAuth, setUploadingWorkAuth] = useState(false);
+  const [savingWorkAuth, setSavingWorkAuth] = useState(false);
 
   const publicUrl = profile?.vanity_slug
     ? `/v/${profile.vanity_slug}`
@@ -68,26 +92,162 @@ export default function VerifyClient({
     setGeneratingSlug(false);
   }
 
+  // Poll for verification status after completing embedded flow
+  const startPolling = useCallback(() => {
+    if (pollingRef.current) return;
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch("/api/persona/status");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.status === "completed") {
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          pollingRef.current = null;
+          toast.success("Identity verified!", {
+            description: "Your Vouch Verified badge is now active.",
+          });
+          router.refresh();
+        } else if (data.status === "rejected") {
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          pollingRef.current = null;
+          toast.error("Verification was not approved", {
+            description: "Please try again or contact support.",
+          });
+          router.refresh();
+        }
+      } catch {
+        // Silently continue polling
+      }
+    }, 3000);
+  }, [router]);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
+
   async function startPersonaVerification() {
     setStartingPersona(true);
     try {
-      const res = await fetch("/api/persona/create-inquiry", { method: "POST" });
+      const res = await fetch("/api/persona/create-inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || "Failed to start verification");
       }
-      const { sessionUrl } = await res.json();
-      if (sessionUrl) {
-        window.location.href = sessionUrl;
+
+      const { inquiryId, sessionToken, sandbox } = data;
+
+      if (inquiryId && sessionToken) {
+        // Use embedded inline flow
+        setPersonaSession({ inquiryId, sessionToken, sandbox: !!sandbox });
+        setShowPersonaInline(true);
+      } else if (data.sessionUrl) {
+        // Fallback to redirect if no session token
+        window.location.href = data.sessionUrl;
       } else {
         toast.error("Could not start verification session.");
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to start verification";
+      const message =
+        err instanceof Error ? err.message : "Failed to start verification";
       toast.error("Verification error", { description: message });
     } finally {
       setStartingPersona(false);
     }
+  }
+
+  function handlePersonaComplete(inquiryId: string, status: string) {
+    setShowPersonaInline(false);
+    setPersonaSession(null);
+    toast.success("Verification submitted!", {
+      description: "We're processing your results now...",
+    });
+    // Start polling for the webhook to update our DB
+    startPolling();
+  }
+
+  function handlePersonaCancel() {
+    setShowPersonaInline(false);
+    setPersonaSession(null);
+    toast.info("Verification cancelled", {
+      description: "You can restart anytime.",
+    });
+  }
+
+  async function handleWorkAuthSave() {
+    if (!workAuthType) {
+      toast.error("Please select your work authorization status.");
+      return;
+    }
+    setSavingWorkAuth(true);
+    try {
+      const { error } = await supabase
+        .from("verification_requests")
+        .upsert(
+          {
+            profile_id: user.id,
+            immigration_status: workAuthType,
+            status_valid_until: workAuthExpiry || null,
+          },
+          { onConflict: "profile_id" }
+        );
+
+      if (error) throw error;
+
+      toast.success("Work authorization saved", {
+        description: "Your status has been recorded.",
+      });
+      setShowWorkAuthForm(false);
+      router.refresh();
+    } catch (err) {
+      toast.error("Failed to save work authorization");
+    } finally {
+      setSavingWorkAuth(false);
+    }
+  }
+
+  async function handleWorkAuthDocUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingWorkAuth(true);
+    const filePath = `${user.id}/${Date.now()}-workauth-${file.name}`;
+
+    const { error } = await supabase.storage
+      .from("verification-docs")
+      .upload(filePath, file);
+
+    if (error) {
+      toast.error("Upload failed", { description: error.message });
+      setUploadingWorkAuth(false);
+      return;
+    }
+
+    // Update the verification request with document path
+    await supabase
+      .from("verification_requests")
+      .upsert(
+        {
+          profile_id: user.id,
+          document_path: filePath,
+          document_uploaded_at: new Date().toISOString(),
+          immigration_status: workAuthType || null,
+          status_valid_until: workAuthExpiry || null,
+        },
+        { onConflict: "profile_id" }
+      );
+
+    setUploadingWorkAuth(false);
+    toast.success("Document uploaded", {
+      description: "Your work authorization document is on file.",
+    });
+    router.refresh();
   }
 
   async function handleVerificationUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -301,51 +461,69 @@ export default function VerifyClient({
               <StatusBadge status={identityStatus} />
             </div>
 
-            {/* Camera / photo capture area */}
+            {/* Verification upload or embedded Persona flow */}
             {!isIdentityVerified && (
               <div className="flex-1 flex flex-col">
-                <label className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors overflow-hidden group">
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
-                  <span className="material-symbols-outlined text-muted-foreground text-5xl mb-2 relative z-10 group-hover:text-primary transition-colors">
-                    photo_camera
-                  </span>
-                  <span className="text-sm font-medium text-muted-foreground relative z-10">
-                    {uploadingVerification
-                      ? "Uploading securely..."
-                      : "Capture or upload your ID"}
-                  </span>
-                  <span className="text-xs text-muted-foreground/60 mt-1 relative z-10">
-                    JPG, PNG, or PDF. Deleted after review.
-                  </span>
-                  <input
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.pdf"
-                    onChange={handleVerificationUpload}
-                    disabled={uploadingVerification}
-                    className="hidden"
+                {showPersonaInline && personaSession ? (
+                  <PersonaInline
+                    inquiryId={personaSession.inquiryId}
+                    sessionToken={personaSession.sessionToken}
+                    sandbox={personaSession.sandbox}
+                    onComplete={handlePersonaComplete}
+                    onCancel={handlePersonaCancel}
                   />
-                </label>
+                ) : (
+                  <>
+                    {/* Primary: Manual ID upload */}
+                    <label className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+                      <span className="material-symbols-outlined text-muted-foreground text-5xl mb-2 relative z-10 group-hover:text-primary transition-colors">
+                        upload_file
+                      </span>
+                      <span className="text-sm font-medium text-muted-foreground relative z-10">
+                        {uploadingVerification
+                          ? "Uploading securely..."
+                          : "Upload your government-issued ID"}
+                      </span>
+                      <span className="text-xs text-muted-foreground/60 mt-1 relative z-10">
+                        JPG, PNG, or PDF. Encrypted and deleted after review.
+                      </span>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={handleVerificationUpload}
+                        disabled={uploadingVerification}
+                        className="hidden"
+                      />
+                    </label>
 
-                <div className="flex gap-3 mt-4">
-                  <Button
-                    onClick={startPersonaVerification}
-                    disabled={startingPersona}
-                    className="flex-1 bg-primary text-white rounded-xl hover:bg-primary/90"
-                    size="lg"
-                  >
-                    {startingPersona ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <span className="material-symbols-outlined text-base mr-2">photo_camera</span>
-                    )}
-                    {startingPersona ? "Starting..." : "Open Camera"}
-                  </Button>
-                </div>
+                    <div className="relative flex items-center my-4">
+                      <div className="flex-1 border-t border-border" />
+                      <span className="px-3 text-xs text-muted-foreground">or verify instantly</span>
+                      <div className="flex-1 border-t border-border" />
+                    </div>
 
-                <p className="text-xs text-muted-foreground mt-3">
-                  You&apos;ll be redirected to our secure partner. Have your government-issued ID ready.
-                </p>
+                    {/* Secondary: Automated Persona verification */}
+                    <Button
+                      onClick={startPersonaVerification}
+                      disabled={startingPersona}
+                      variant="outline"
+                      className="w-full rounded-xl"
+                      size="lg"
+                    >
+                      {startingPersona ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <span className="material-symbols-outlined text-base mr-2">photo_camera</span>
+                      )}
+                      {startingPersona ? "Starting..." : "Scan ID with Camera"}
+                    </Button>
+
+                    <p className="text-xs text-muted-foreground mt-3">
+                      Automated identity check powered by Persona. Have your government-issued ID ready.
+                    </p>
+                  </>
+                )}
               </div>
             )}
 
@@ -367,29 +545,131 @@ export default function VerifyClient({
 
           {/* ── Side Cards (2x2 grid) ── */}
           <div className="md:col-span-2 grid grid-cols-2 gap-4">
-            {/* Work Authorization */}
-            <div className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
-              <span className="material-symbols-outlined text-primary text-2xl">work_history</span>
-              <div>
-                <h4 className="font-semibold text-foreground text-sm">Work Auth</h4>
-                <p className="text-xs text-muted-foreground mt-0.5">Employment eligibility</p>
+            {/* Work Authorization — expandable */}
+            {showWorkAuthForm ? (
+              <div className="col-span-2 bg-card rounded-xl border-2 border-primary/20 p-5 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-2xl">work_history</span>
+                    <h4 className="font-semibold text-foreground text-sm">Work Authorization</h4>
+                  </div>
+                  <button
+                    onClick={() => setShowWorkAuthForm(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <span className="material-symbols-outlined text-xl">close</span>
+                  </button>
+                </div>
+
+                {/* Status dropdown */}
+                <div>
+                  <label className="text-xs font-medium text-foreground block mb-1.5">
+                    Authorization type
+                  </label>
+                  <select
+                    value={workAuthType}
+                    onChange={(e) => setWorkAuthType(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  >
+                    <option value="">Select status...</option>
+                    <option value="US Citizen">US Citizen</option>
+                    <option value="Permanent Resident (Green Card)">Permanent Resident (Green Card)</option>
+                    <option value="H-1B">H-1B Visa</option>
+                    <option value="H-1B Transfer">H-1B Transfer</option>
+                    <option value="L-1">L-1 Visa</option>
+                    <option value="O-1">O-1 Visa</option>
+                    <option value="TN Visa">TN Visa</option>
+                    <option value="E-2">E-2 Treaty Investor</option>
+                    <option value="E-3">E-3 (Australian)</option>
+                    <option value="OPT">OPT (F-1)</option>
+                    <option value="CPT">CPT (F-1)</option>
+                    <option value="STEM OPT Extension">STEM OPT Extension</option>
+                    <option value="EAD">Employment Authorization Document (EAD)</option>
+                    <option value="Asylum/Refugee EAD">Asylum/Refugee EAD</option>
+                    <option value="Canadian Citizen">Canadian Citizen</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {/* Expiration date — show for non-permanent statuses */}
+                {workAuthType && !["US Citizen", "Permanent Resident (Green Card)", "Canadian Citizen"].includes(workAuthType) && (
+                  <div>
+                    <label className="text-xs font-medium text-foreground block mb-1.5">
+                      Valid until
+                    </label>
+                    <input
+                      type="date"
+                      value={workAuthExpiry}
+                      onChange={(e) => setWorkAuthExpiry(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                )}
+
+                {/* Supporting document upload */}
+                <div>
+                  <label className="text-xs font-medium text-foreground block mb-1.5">
+                    Supporting document <span className="text-muted-foreground">(optional)</span>
+                  </label>
+                  <label className="flex items-center gap-2 w-full rounded-lg border border-dashed border-border px-3 py-3 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                    <span className="material-symbols-outlined text-muted-foreground text-lg">upload_file</span>
+                    <span className="text-xs text-muted-foreground">
+                      {uploadingWorkAuth ? "Uploading..." : "Upload EAD card, visa stamp, or work permit"}
+                    </span>
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      onChange={handleWorkAuthDocUpload}
+                      disabled={uploadingWorkAuth}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <Button
+                  onClick={handleWorkAuthSave}
+                  disabled={savingWorkAuth || !workAuthType}
+                  className="w-full rounded-xl"
+                >
+                  {savingWorkAuth ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {savingWorkAuth ? "Saving..." : "Save Work Authorization"}
+                </Button>
               </div>
-              <div className="mt-auto">
-                <StatusBadge status={workAuthStatus} />
+            ) : (
+              <div
+                className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3 cursor-pointer hover:border-primary/40 transition-colors"
+                onClick={() => setShowWorkAuthForm(true)}
+              >
+                <span className="material-symbols-outlined text-primary text-2xl">work_history</span>
+                <div>
+                  <h4 className="font-semibold text-foreground text-sm">Work Auth</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {hasWorkAuth
+                      ? latestVerification?.immigration_status
+                      : "Employment eligibility"}
+                  </p>
+                </div>
+                <div className="mt-auto">
+                  <StatusBadge status={workAuthStatus} />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Background Check */}
-            <div className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
-              <span className="material-symbols-outlined text-primary text-2xl">policy</span>
-              <div>
-                <h4 className="font-semibold text-foreground text-sm">Background</h4>
-                <p className="text-xs text-muted-foreground mt-0.5">Background check</p>
+            {!showWorkAuthForm && (
+              <div className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
+                <span className="material-symbols-outlined text-primary text-2xl">policy</span>
+                <div>
+                  <h4 className="font-semibold text-foreground text-sm">Background</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">Background check</p>
+                </div>
+                <div className="mt-auto">
+                  <StatusBadge status="coming_soon" />
+                </div>
               </div>
-              <div className="mt-auto">
-                <StatusBadge status="coming_soon" />
-              </div>
-            </div>
+            )}
 
             {/* Education */}
             <div className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
