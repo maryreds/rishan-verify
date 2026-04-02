@@ -35,6 +35,7 @@ export default function DashboardOverview({
   const [uploadingHeadshot, setUploadingHeadshot] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
   const headshotInputRef = useRef<HTMLInputElement>(null);
+  const [salaryRange, setSalaryRange] = useState<string | null>(null);
 
   const verificationStatus = profile?.verification_status;
 
@@ -43,6 +44,16 @@ export default function DashboardOverview({
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.total != null) setVouchScore(data.total);
+      })
+      .catch(() => {});
+
+    fetch("/api/ai/salary-benchmark", { method: "POST" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.low != null && data?.high != null) {
+          const fmt = (n: number) => `$${Math.round(n / 1000)}k`;
+          setSalaryRange(`${fmt(data.low)} – ${fmt(data.high)}`);
+        }
       })
       .catch(() => {});
   }, []);
@@ -387,7 +398,7 @@ export default function DashboardOverview({
                 Based on your current Vouch Score
               </p>
             </div>
-            <p className="text-2xl font-black text-foreground mt-4">$115k – $140k</p>
+            <p className="text-2xl font-black text-foreground mt-4">{salaryRange || "Calculating..."}</p>
           </div>
 
           {/* Headline A/B */}

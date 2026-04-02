@@ -34,7 +34,7 @@ export function DashboardSidebar({ userName, vouchScore, photoUrl }: DashboardSi
     <aside className="fixed left-0 top-0 w-64 h-screen bg-[#f5f4f0] p-6 flex flex-col z-30">
       {/* Logo */}
       <div className="mb-8">
-        <Link href="/dashboard" className="text-xl font-bold font-[var(--font-headline)] tracking-tight text-foreground">
+        <Link href="/" className="text-xl font-bold font-[var(--font-headline)] tracking-tight text-foreground">
           Vouch
         </Link>
       </div>
