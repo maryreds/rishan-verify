@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes that are excluded from protection (nested under otherwise-protected prefixes)
-  const publicRoutes = ["/reference", "/employer/marketplace", "/employer/candidate"];
+  const publicRoutes = ["/reference", "/employer/marketplace", "/employer/candidate", "/demo"];
   const isPublicRoute = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
