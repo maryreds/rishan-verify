@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Briefcase,
@@ -57,6 +57,9 @@ export default function ProfileClient({
   });
 
   const [savingProfile, setSavingProfile] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(profile?.photo_original_url || null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [showExpDialog, setShowExpDialog] = useState(false);
   const [showEduDialog, setShowEduDialog] = useState(false);
 
@@ -79,6 +82,31 @@ export default function ProfileClient({
 
   const [savingExp, setSavingExp] = useState(false);
   const [savingEdu, setSavingEdu] = useState(false);
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/profile/upload-photo", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error("Upload failed", { description: data.error || "Unknown error" });
+      } else {
+        setPhotoUrl(data.url);
+        toast.success("Profile photo updated!");
+        router.refresh();
+      }
+    } catch (err: any) {
+      toast.error("Upload failed", { description: err.message });
+    }
+    setUploadingPhoto(false);
+  }
 
   async function saveProfile() {
     setSavingProfile(true);
@@ -187,6 +215,50 @@ export default function ProfileClient({
         <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
         <p className="text-sm text-muted-foreground">Edit your professional information.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Photo</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            className="hidden"
+          />
+          <div className="flex items-center gap-4">
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt="Profile photo"
+                className="w-20 h-20 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                <span className="material-symbols-outlined text-muted-foreground text-3xl">person</span>
+              </div>
+            )}
+            <Button
+              variant="outline"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploadingPhoto}
+            >
+              {uploadingPhoto ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Uploading...
+                </>
+              ) : photoUrl ? (
+                "Change photo"
+              ) : (
+                "Upload photo"
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -265,23 +265,34 @@ export default function DashboardOverview({
             </div>
           </div>
 
-          {/* Headshot upload prompt (preserved from original) */}
-          {!headshot && (
-            <div className="mt-4 flex items-center gap-3">
-              <button
-                onClick={() => headshotInputRef.current?.click()}
-                disabled={uploadingHeadshot}
-                className="flex items-center gap-2 text-sm text-primary hover:underline"
-              >
-                {uploadingHeadshot ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <span className="material-symbols-outlined text-lg">add_a_photo</span>
-                )}
-                {uploadingHeadshot ? "Uploading..." : "Add a profile photo to boost your score"}
-              </button>
-            </div>
-          )}
+          {/* Headshot upload / change prompt */}
+          <div className="mt-4 flex items-center gap-3">
+            {headshot && (
+              <img
+                src={headshot}
+                alt="Profile photo"
+                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              />
+            )}
+            <button
+              onClick={() => headshotInputRef.current?.click()}
+              disabled={uploadingHeadshot}
+              className="flex items-center gap-2 text-sm text-primary hover:underline"
+            >
+              {uploadingHeadshot ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <span className="material-symbols-outlined text-lg">
+                  {headshot ? "edit" : "add_a_photo"}
+                </span>
+              )}
+              {uploadingHeadshot
+                ? "Uploading..."
+                : headshot
+                  ? "Change profile photo"
+                  : "Add a profile photo to boost your score"}
+            </button>
+          </div>
 
           {/* Share / Public Link actions (preserved from original) */}
           <div className="mt-4 flex flex-wrap gap-3">
