@@ -29,7 +29,7 @@ export default async function EmployerCandidateDeepDivePage({ params }: PageProp
     verification_status: "verified",
     vouch_score: 89,
     photo_original_url: "https://randomuser.me/api/portraits/women/68.jpg",
-    skills: ["Design Systems", "Product Strategy", "UX Research", "Figma", "React", "Accessibility"],
+    skills: ["Design Systems", "Product Strategy", "UX Research", "Figma", "React", "Accessibility", "User Testing", "Prototyping", "Design Tokens", "WCAG Compliance", "Cross-functional Leadership", "Data-Driven Design"],
   };
   const p = profile ?? demoProfile;
 

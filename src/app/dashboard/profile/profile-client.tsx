@@ -57,6 +57,7 @@ export default function ProfileClient({
   });
 
   const [savingProfile, setSavingProfile] = useState(false);
+  const [newSkillInput, setNewSkillInput] = useState("");
   const [photoUrl, setPhotoUrl] = useState(profile?.photo_original_url || null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -294,15 +295,87 @@ export default function ProfileClient({
                 placeholder="Brief professional summary..."
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="skills">Skills (comma-separated)</Label>
-              <Input
-                id="skills"
-                type="text"
-                value={formData.skills}
-                onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                placeholder="Salesforce, Apex, JavaScript, SQL"
-              />
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="skills">Skills</Label>
+              <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 border rounded-md bg-background">
+                {formData.skills
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+                  .map((skill) => (
+                    <span
+                      key={skill}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = formData.skills
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter((s) => s && s !== skill)
+                            .join(", ");
+                          setFormData({ ...formData, skills: updated });
+                        }}
+                        className="ml-0.5 hover:text-destructive"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  id="skills"
+                  type="text"
+                  value={newSkillInput}
+                  onChange={(e) => setNewSkillInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault();
+                      const raw = newSkillInput.replace(/,/g, "").trim();
+                      if (raw) {
+                        const existing = formData.skills
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+                        if (!existing.some((s) => s.toLowerCase() === raw.toLowerCase())) {
+                          setFormData({ ...formData, skills: [...existing, raw].join(", ") });
+                        }
+                      }
+                      setNewSkillInput("");
+                    }
+                  }}
+                  placeholder="Type a skill and press Enter..."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const raw = newSkillInput.replace(/,/g, "").trim();
+                    if (raw) {
+                      const existing = formData.skills
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                      if (!existing.some((s) => s.toLowerCase() === raw.toLowerCase())) {
+                        setFormData({ ...formData, skills: [...existing, raw].join(", ") });
+                      }
+                    }
+                    setNewSkillInput("");
+                  }}
+                  disabled={!newSkillInput.trim()}
+                  className="shrink-0"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Press Enter or comma to add each skill. Click the x to remove.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="domains">Domains (comma-separated)</Label>
@@ -315,23 +388,6 @@ export default function ProfileClient({
               />
             </div>
           </div>
-
-          {formData.skills && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {formData.skills
-                .split(",")
-                .map((s) => s.trim())
-                .filter(Boolean)
-                .map((skill) => (
-                  <span
-                    key={skill}
-                    className="px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full"
-                  >
-                    {skill}
-                  </span>
-                ))}
-            </div>
-          )}
 
           <Button onClick={saveProfile} disabled={savingProfile} className="mt-6">
             {savingProfile && <Loader2 className="h-4 w-4 animate-spin mr-2" />}

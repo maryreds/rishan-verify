@@ -166,6 +166,7 @@ export default function OnboardingClient({
   const [parsedSkills, setParsedSkills] = useState<
     { name: string; category: string; selected: boolean }[]
   >([]);
+  const [customSkillInput, setCustomSkillInput] = useState("");
 
   const updateStep = useCallback(
     async (newStep: number) => {
@@ -490,7 +491,7 @@ export default function OnboardingClient({
           profile_id: user.id,
           name: skill.name,
           category: skill.category,
-          source: "ai_parsed",
+          source: skill.category === "Custom" ? "manual" : "ai_parsed",
         },
         { onConflict: "profile_id,name" }
       );
@@ -924,10 +925,12 @@ export default function OnboardingClient({
                   Your skills
                 </h2>
                 <p className="text-muted-foreground mt-2">
-                  Tap to toggle skills on or off. These help employers find you.
+                  {parsedSkills.length > 0
+                    ? "Tap to toggle skills on or off, and add any we missed."
+                    : "Add your skills below. These help employers find you."}
                 </p>
               </div>
-              {parsedSkills.length > 0 ? (
+              {parsedSkills.length > 0 && (
                 <div className="space-y-3">
                   {Object.entries(
                     parsedSkills.reduce(
@@ -977,19 +980,67 @@ export default function OnboardingClient({
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label>Skills (comma-separated)</Label>
-                  <Textarea
-                    value={form.skills}
-                    onChange={(e) =>
-                      setForm({ ...form, skills: e.target.value })
-                    }
-                    rows={3}
-                    placeholder="JavaScript, React, Node.js, Python..."
-                  />
-                </div>
               )}
+
+              {/* Add custom skills */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  {parsedSkills.length > 0 ? "Add more skills" : "Your skills"}
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={customSkillInput}
+                    onChange={(e) => setCustomSkillInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        const raw = customSkillInput.replace(/,/g, "").trim();
+                        if (raw && !parsedSkills.some((s) => s.name.toLowerCase() === raw.toLowerCase())) {
+                          setParsedSkills([
+                            ...parsedSkills,
+                            { name: raw, category: "Custom", selected: true },
+                          ]);
+                          // Also add to form.skills for the fallback save path
+                          const existing = form.skills ? form.skills.split(",").map((s) => s.trim()).filter(Boolean) : [];
+                          if (!existing.some((s) => s.toLowerCase() === raw.toLowerCase())) {
+                            setForm({ ...form, skills: [...existing, raw].join(", ") });
+                          }
+                        }
+                        setCustomSkillInput("");
+                      }
+                    }}
+                    placeholder="Type a skill and press Enter..."
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const raw = customSkillInput.replace(/,/g, "").trim();
+                      if (raw && !parsedSkills.some((s) => s.name.toLowerCase() === raw.toLowerCase())) {
+                        setParsedSkills([
+                          ...parsedSkills,
+                          { name: raw, category: "Custom", selected: true },
+                        ]);
+                        const existing = form.skills ? form.skills.split(",").map((s) => s.trim()).filter(Boolean) : [];
+                        if (!existing.some((s) => s.toLowerCase() === raw.toLowerCase())) {
+                          setForm({ ...form, skills: [...existing, raw].join(", ") });
+                        }
+                      }
+                      setCustomSkillInput("");
+                    }}
+                    disabled={!customSkillInput.trim()}
+                    className="shrink-0"
+                  >
+                    <Check className="w-4 h-4 mr-1" />
+                    Add
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Press Enter or comma to add each skill.
+                </p>
+              </div>
             </div>
           )}
 
