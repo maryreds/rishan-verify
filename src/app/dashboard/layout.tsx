@@ -19,7 +19,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, verification_status, vouch_score, photo_url")
+    .select("full_name, verification_status, vouch_score, photo_original_url")
     .eq("id", user.id)
     .single();
 
@@ -28,7 +28,7 @@ export default async function DashboardLayout({
       <DashboardSidebar
         userName={profile?.full_name || user.email?.split("@")[0] || "Candidate"}
         vouchScore={profile?.vouch_score ?? 0}
-        photoUrl={profile?.photo_url || null}
+        photoUrl={profile?.photo_original_url || null}
       />
       <main className="ml-64 min-h-screen p-8 lg:p-12 bg-[#faf9f5]">
         {children}
