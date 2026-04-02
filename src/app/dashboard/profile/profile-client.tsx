@@ -135,6 +135,7 @@ export default function ProfileClient({
     } else {
       toast.success("Profile saved successfully");
       fetch("/api/profile/vouch-score", { method: "POST" }).catch(() => {});
+      router.refresh();
     }
 
     setSavingProfile(false);
