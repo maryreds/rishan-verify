@@ -47,6 +47,16 @@ export async function POST() {
       currentRole,
     });
 
+    // Ensure senior profiles (5+ years or leadership roles) get appropriate floor
+    const seniorKeywords = ["senior", "lead", "principal", "director", "manager", "head", "vp", "chief", "staff", "consultant"];
+    const isSenior = yearsExperience >= 5 || seniorKeywords.some(k => currentRole.toLowerCase().includes(k));
+    if (isSenior && estimate.low < 150000) {
+      const boost = 150000 - estimate.low;
+      estimate.low += boost;
+      estimate.median += boost;
+      estimate.high += boost;
+    }
+
     return NextResponse.json(estimate);
   } catch (error) {
     console.error("Salary benchmark error:", error);

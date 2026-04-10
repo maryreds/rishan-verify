@@ -35,7 +35,7 @@ Return ONLY a JSON object with this exact structure:
   "confidence": "high" | "medium" | "low"
 }
 
-Base your estimates on current market data. Be realistic and conservative. If you have limited information, set confidence to "low".
+Base your estimates on current US market data for total compensation (base + bonus + equity where applicable). Factor in seniority, leadership experience, and in-demand skill premiums. For candidates with 5+ years of experience or leadership/management roles, benchmark against senior-level market rates. If you have limited information, set confidence to "low".
 Return JSON only, no explanation.`,
       },
       {

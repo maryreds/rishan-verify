@@ -87,6 +87,10 @@ export default function ProfileClient({
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 4.5 * 1024 * 1024) {
+      toast.error("File too large", { description: "Please use an image under 4.5 MB." });
+      return;
+    }
     setUploadingPhoto(true);
     try {
       const formData = new FormData();
@@ -95,7 +99,14 @@ export default function ProfileClient({
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        toast.error("Upload failed", { description: "File may be too large. Please use an image under 10 MB." });
+        setUploadingPhoto(false);
+        return;
+      }
       if (!res.ok) {
         toast.error("Upload failed", { description: data.error || "Unknown error" });
       } else {
