@@ -9,299 +9,430 @@ import {
   FileCheck,
   Briefcase,
   GraduationCap,
+  MessageSquare,
+  Plus,
+  Sparkles,
+  CheckCircle2,
+  Search,
+  LayoutDashboard,
+  Target,
+  BarChart3,
+  Shield,
+  Bot,
+  Settings,
+  ChevronRight,
 } from "lucide-react";
 import { AchievementBadgesRow } from "@/components/vouch/achievement-badges-row";
 
-// Preview badge with sample data (Ananya Mehta)
+// Preview badge with sample data (Elena Rodriguez)
 export default function PreviewBadgePage() {
   const candidate = {
-    name: "Ananya Mehta",
-    location: "Dallas, TX",
-    headline: "Senior Full-Stack Engineer",
+    name: "Elena Rodriguez",
+    location: "San Francisco, CA",
+    headline: "Senior Product Designer & Systems Architect",
     photo:
-      "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=540&h=720&fit=crop&crop=face",
-    verificationId: "RV-2026-A7F3K9",
-    immigrationStatus: "H-1B Visa",
-    verifiedDate: "March 2, 2026",
-    validUntil: "March 2, 2027",
-    skills: [
-      "React",
-      "Node.js",
-      "TypeScript",
-      "AWS",
-      "PostgreSQL",
-      "GraphQL",
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face",
+    verificationId: "VCH-2026-E7R3K9",
+    immigrationStatus: "US Citizen",
+    verifiedDate: "March 15, 2026",
+    validUntil: "March 15, 2027",
+    tags: ["Remote First", "2 Weeks Notice"],
+    trustAudit: [
+      {
+        label: "Identity Verification",
+        description: "Government-issued ID + biometric match",
+        status: "verified" as const,
+      },
+      {
+        label: "SSN Trace & Address History",
+        description: "7-year address history and identity trace",
+        status: "verified" as const,
+      },
+      {
+        label: "Global Watchlist & Sanctions",
+        description: "OFAC, FBI, Interpol, and international lists",
+        status: "cleared" as const,
+      },
+    ],
+    competencies: [
+      { skill: "Design Systems", level: "Expert", pct: 96, color: "bg-green-500" },
+      { skill: "Product Strategy", level: "Expert", pct: 91, color: "bg-green-500" },
+      { skill: "UX Research", level: "Advanced", pct: 78, color: "bg-amber-500" },
+      { skill: "Figma", level: "Intermediate", pct: 65, color: "bg-orange-400" },
+    ],
+    techStack: [
+      "Design Systems", "Product Strategy",
+      "UX Research", "Figma", "React",
+      "Accessibility", "User Testing", "Prototyping",
+      "Design Tokens", "WCAG Compliance",
+      "Cross-functional Leadership", "Data-Driven Design",
+    ],
+    references: [
+      {
+        name: "James Chen",
+        role: "VP of Engineering at TechCorp",
+        quote: "Elena is consistently described as a high-impact contributor with strong technical depth. Peers highlight exceptional problem-solving ability, collaborative communication style, and a bias toward action that accelerates team velocity.",
+      },
     ],
     experience: [
       {
-        title: "Senior Full-Stack Engineer",
+        title: "Senior Product Designer",
         company: "TechCorp Inc.",
-        period: "2023 - Present",
+        period: "2022 — Present",
+        description: "Led design system architecture serving 12 product teams. Reduced component inconsistencies by 73%.",
       },
       {
-        title: "Software Engineer",
-        company: "StartupXYZ",
-        period: "2020 - 2023",
+        title: "Product Designer",
+        company: "DesignLab Studio",
+        period: "2019 — 2022",
+        description: "Shipped 3 major product launches. Established user research practice from scratch.",
       },
     ],
     education: [
       {
-        institution: "University of Texas at Dallas",
-        degree: "M.S. Computer Science",
-        period: "2018 - 2020",
+        institution: "Rhode Island School of Design",
+        degree: "BFA Industrial Design",
+        period: "2015 — 2019",
       },
     ],
   };
 
-  return (
-    <div className="min-h-screen bg-[#06060f] text-white">
-      {/* Nav */}
-      <nav className="border-b border-white/5 px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <ShieldCheck className="w-6 h-6 text-blue-400" />
-            <span className="font-bold text-sm tracking-tight">
-              Vouch
-            </span>
-          </div>
-          <Link
-            href="/"
-            className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-          >
-            Get verified yourself <ExternalLink className="w-3 h-3" />
-          </Link>
-        </div>
-      </nav>
+  const statusBadge = (status: "verified" | "cleared") => {
+    if (status === "verified") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[11px] font-semibold tracking-wide uppercase">
+          <CheckCircle2 className="w-3 h-3" />
+          Verified
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[11px] font-semibold tracking-wide uppercase">
+        <ShieldCheck className="w-3 h-3" />
+        Cleared
+      </span>
+    );
+  };
 
-      <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
-        {/* Hero Section */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-stretch">
-            {/* Photo Card */}
+  const levelBadge = (level: string) => {
+    const colors: Record<string, string> = {
+      Expert: "bg-green-100 text-green-700 border-green-200",
+      Advanced: "bg-amber-50 text-amber-700 border-amber-200",
+      Intermediate: "bg-orange-50 text-orange-600 border-orange-200",
+    };
+    return (
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${colors[level] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
+        {level}
+      </span>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50/80 flex">
+      {/* ── Left Sidebar ── */}
+      <aside className="hidden lg:flex w-[220px] flex-col bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-40">
+        <div className="px-5 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-green-700 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">E</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Employer</p>
+              <p className="text-[10px] text-gray-400">Talent Acquisition</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {[
+            { icon: LayoutDashboard, label: "Dashboard", active: false },
+            { icon: Target, label: "Job Matches", active: true },
+            { icon: BarChart3, label: "Analytics", active: false },
+            { icon: Shield, label: "Verify", active: false },
+            { icon: Bot, label: "AI Coach", active: false },
+          ].map((item) => (
             <div
-              className="flex-shrink-0 relative rounded-3xl overflow-hidden"
-              style={{
-                width: 268,
-                boxShadow:
-                  "0 30px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.08)",
-              }}
+              key={item.label}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm cursor-default ${
+                item.active
+                  ? "bg-green-50 text-green-700 font-medium"
+                  : "text-gray-500 hover:bg-gray-50"
+              }`}
             >
-              <Image
-                alt={candidate.name}
-                src={candidate.photo}
-                width={268}
-                height={356}
-                className="object-cover w-full block"
-                style={{ height: 356 }}
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(4,4,18,0.95) 0%, rgba(4,4,18,0.55) 40%, transparent 70%)",
-                }}
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <h1 className="text-xl font-bold text-white tracking-tight">
+              <item.icon className="w-4 h-4" />
+              {item.label}
+            </div>
+          ))}
+        </nav>
+
+        <div className="px-3 pb-4 mt-auto space-y-3">
+          <div className="bg-green-50 border border-green-100 rounded-xl p-4">
+            <p className="text-xs font-semibold text-green-800">Enterprise Plan</p>
+            <p className="text-[10px] text-green-600 mt-1">Unlock unlimited searches and advanced analytics.</p>
+            <button className="mt-3 w-full py-1.5 bg-green-700 text-white text-xs font-medium rounded-lg hover:bg-green-800 transition-colors">
+              Upgrade Now
+            </button>
+          </div>
+          <div className="flex items-center gap-2.5 px-3 py-2 text-gray-400 text-sm">
+            <Settings className="w-4 h-4" />
+            Settings
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Main Content ── */}
+      <main className="flex-1 lg:ml-[220px]">
+        {/* Breadcrumb */}
+        <div className="bg-white border-b border-gray-200 px-8 py-3">
+          <div className="flex items-center gap-1.5 text-sm text-gray-400">
+            <Link href="/" className="hover:text-gray-600 transition-colors">Vouch</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <Link href="/" className="hover:text-gray-600 transition-colors">Marketplace</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-gray-700 font-medium">{candidate.name}</span>
+          </div>
+        </div>
+
+        <div className="px-8 py-8 max-w-6xl">
+          {/* ── Profile Header ── */}
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-6 mb-8">
+            <div className="flex items-start gap-5">
+              <div className="relative flex-shrink-0">
+                <Image
+                  alt={candidate.name}
+                  src={candidate.photo}
+                  width={100}
+                  height={100}
+                  className="w-[100px] h-[100px] rounded-full object-cover border-4 border-white shadow-lg"
+                />
+                <div className="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-green-600 rounded-full flex items-center justify-center border-3 border-white shadow">
+                  <CheckCircle2 className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                     {candidate.name}
                   </h1>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500 rounded text-[9px] font-black tracking-wider text-white">
-                    &#10003; VERIFIED
+                  <ShieldCheck className="w-5 h-5 text-green-600" />
+                </div>
+                <p className="text-sm text-gray-500 mt-0.5">{candidate.headline}</p>
+                <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                  {candidate.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  <span className="flex items-center gap-1 text-xs text-gray-400">
+                    <MapPin className="w-3 h-3" />
+                    {candidate.location}
                   </span>
                 </div>
-                <p className="text-xs text-white/60 mb-4 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 flex-shrink-0" />{" "}
-                  {candidate.location} &middot; {candidate.headline}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-700 text-white text-sm font-medium rounded-lg hover:bg-green-800 transition-colors shadow-sm">
+                <Plus className="w-4 h-4" />
+                Add to Pipeline
+              </button>
+              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm">
+                <MessageSquare className="w-4 h-4" />
+                Message Candidate
+              </button>
+            </div>
+          </div>
+
+          {/* ── Two Column Layout ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Trust Audit Report */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-5">
+                  <ShieldCheck className="w-5 h-5 text-gray-700" />
+                  <h2 className="text-base font-bold text-gray-900">Trust Audit Report</h2>
+                </div>
+                <div className="space-y-4">
+                  {candidate.trustAudit.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                          {i === 0 && <Fingerprint className="w-4 h-4 text-gray-500" />}
+                          {i === 1 && <FileCheck className="w-4 h-4 text-gray-500" />}
+                          {i === 2 && <Shield className="w-4 h-4 text-gray-500" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                          <p className="text-xs text-gray-400">{item.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {statusBadge(item.status)}
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Verified Reference Synthesis */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-gray-700" />
+                    <h2 className="text-base font-bold text-gray-900">Verified Reference Synthesis</h2>
+                  </div>
+                  <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 text-violet-700 border border-violet-200 rounded-lg text-xs font-medium hover:bg-violet-100 transition-colors">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    AI Insights
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Based on {candidate.references.length} verified peer vouches, {candidate.name.split(" ")[0]} is consistently described as a high-impact contributor with strong technical depth. Peers highlight exceptional problem-solving ability, collaborative communication style, and a bias toward action that accelerates team velocity.
                 </p>
-                <div
-                  className="flex items-center gap-3 rounded-2xl px-4 py-3"
-                  style={{
-                    background: "rgba(10,10,25,0.7)",
-                    backdropFilter: "blur(12px)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
-                >
-                  <div
-                    className="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ boxShadow: "0 0 16px rgba(34,197,94,0.4)" }}
-                  >
-                    <ShieldCheck
-                      style={{ width: 18, height: 18, color: "white" }}
+              </div>
+
+              {/* Experience */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Briefcase className="w-5 h-5 text-gray-700" />
+                  <h2 className="text-base font-bold text-gray-900">Experience</h2>
+                </div>
+                <div className="space-y-4">
+                  {candidate.experience.map((exp, i) => (
+                    <div key={i} className="relative pl-6 border-l-2 border-gray-100">
+                      <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-green-500" />
+                      <p className="text-sm font-semibold text-gray-900">{exp.title}</p>
+                      <p className="text-xs text-gray-500">{exp.company}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{exp.period}</p>
+                      {exp.description && (
+                        <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">{exp.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Competency Matrix */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-5">
+                  <BarChart3 className="w-5 h-5 text-gray-700" />
+                  <h2 className="text-base font-bold text-gray-900">Competency Matrix</h2>
+                </div>
+                <div className="space-y-4">
+                  {candidate.competencies.map((comp, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-sm font-medium text-gray-700">{comp.skill}</p>
+                        <div className="flex items-center gap-2">
+                          {levelBadge(comp.level)}
+                          <span className="text-xs text-gray-400 w-8 text-right">{comp.pct}%</span>
+                        </div>
+                      </div>
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${comp.color}`}
+                          style={{ width: `${comp.pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Technical Stack */}
+                <div className="mt-6 pt-5 border-t border-gray-100">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Technical Stack
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {candidate.techStack.map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-2.5 py-1 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-xs font-medium"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Verification Badges */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-5">
+                  <Shield className="w-5 h-5 text-gray-700" />
+                  <h2 className="text-base font-bold text-gray-900">Verification Badges</h2>
+                </div>
+                <AchievementBadgesRow
+                  identity={true}
+                  workAuth={true}
+                  background={true}
+                  education={true}
+                  references={true}
+                  size="md"
+                />
+              </div>
+
+              {/* Education */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <GraduationCap className="w-5 h-5 text-gray-700" />
+                  <h2 className="text-base font-bold text-gray-900">Education</h2>
+                </div>
+                <div className="space-y-3">
+                  {candidate.education.map((edu, i) => (
+                    <div key={i}>
+                      <p className="text-sm font-semibold text-gray-900">{edu.institution}</p>
+                      <p className="text-xs text-gray-500">{edu.degree}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{edu.period}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* QR Code Share */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="bg-white rounded-lg border border-gray-200 p-1.5">
+                    <img
+                      alt="Scan to view verified profile"
+                      width={80}
+                      height={80}
+                      className="w-[80px] h-[80px]"
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent("https://vouch-app-xi.vercel.app/preview-badge")}&bgcolor=ffffff&color=000000&margin=4`}
                     />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-white leading-tight">
-                      Identity Verified
+                    <p className="text-sm font-semibold text-gray-900">Share Verified Profile</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      Scan QR code or share link to verify this candidate instantly.
                     </p>
-                    <p className="text-[10px] text-white/55 leading-tight mt-0.5">
-                      Work authorization confirmed via government sources
-                    </p>
+                    <p className="text-[10px] text-gray-300 font-mono mt-2">{candidate.verificationId}</p>
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* QR Code Card */}
-            <div className="relative flex-1" style={{ minWidth: 200 }}>
-              <div className="absolute -inset-1 bg-gradient-to-b from-blue-500/20 to-violet-500/20 rounded-3xl blur-xl" />
-              <div
-                className="relative h-full bg-[#0d0d1a] border border-white/10 rounded-3xl flex flex-col items-center justify-center gap-4 p-6"
-                style={{ minHeight: 356 }}
-              >
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                  <span className="text-[10px] font-bold text-slate-300 tracking-widest uppercase">
-                    Share Badge
-                  </span>
-                </div>
-                <div className="bg-[#0d0d1a] rounded-2xl overflow-hidden ring-1 ring-white/10">
-                  <img
-                    alt="Scan to view verification badge"
-                    width={148}
-                    height={148}
-                    className="w-[148px] h-[148px]"
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fvouch.app%2Fpreview-badge&bgcolor=0d0d1a&color=ffffff&margin=12`}
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-xs font-semibold text-white mb-1">
-                    Scan to verify
-                  </p>
-                  <p className="text-[10px] text-slate-500 leading-relaxed">
-                    Add anywhere — resume, LinkedIn, email signature
-                  </p>
-                </div>
-                <div className="text-[9px] text-slate-600 font-mono text-center">
-                  {candidate.verificationId}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 flex items-center gap-1">
-                <Fingerprint className="w-3 h-3" /> Verification ID
-              </p>
-              <p className="text-sm font-semibold text-white truncate">
-                {candidate.verificationId}
-              </p>
-            </div>
-            <div className="bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 flex items-center gap-1">
-                <FileCheck className="w-3 h-3" /> Work Auth
-              </p>
-              <p className="text-sm font-semibold text-white truncate">
-                {candidate.immigrationStatus}
-              </p>
-            </div>
-            <div className="bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 flex items-center gap-1">
-                <Clock className="w-3 h-3" /> Verified
-              </p>
-              <p className="text-sm font-semibold text-white truncate">
-                {candidate.verifiedDate}
-              </p>
-            </div>
-            <div className="bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1 flex items-center gap-1">
-                <Clock className="w-3 h-3" /> Valid Until
-              </p>
-              <p className="text-sm font-semibold text-white truncate">
-                {candidate.validUntil}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Verified Badges Section */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-5 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-blue-400" />
-            Verified Badges
-          </p>
-          <div className="relative bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] rounded-3xl p-8">
-            <AchievementBadgesRow
-              identity={true}
-              workAuth={true}
-              background={false}
-              education={true}
-              references={false}
-              size="lg"
-            />
-          </div>
-        </div>
-
-        {/* Skills */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
-            Skills &amp; Technologies
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {candidate.skills.map((skill) => (
-              <span
-                key={skill}
-                className="px-3 py-1.5 bg-white/[0.05] border border-white/10 rounded-full text-xs text-slate-300"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Experience */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
-            <Briefcase className="w-4 h-4" /> Experience
-          </p>
-          <div className="space-y-3">
-            {candidate.experience.map((exp) => (
-              <div
-                key={exp.title}
-                className="bg-white/[0.02] border border-white/5 rounded-xl p-4"
-              >
-                <p className="font-semibold text-white text-sm">{exp.title}</p>
-                <p className="text-xs text-slate-400">{exp.company}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{exp.period}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Education */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
-            <GraduationCap className="w-4 h-4" /> Education
-          </p>
-          <div className="space-y-3">
-            {candidate.education.map((edu) => (
-              <div
-                key={edu.institution}
-                className="bg-white/[0.02] border border-white/5 rounded-xl p-4"
-              >
-                <p className="font-semibold text-white text-sm">
-                  {edu.institution}
-                </p>
-                <p className="text-xs text-slate-400">{edu.degree}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{edu.period}</p>
-              </div>
-            ))}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="pt-8 border-t border-white/5 text-center">
-          <p className="text-xs text-slate-600">
+        <div className="px-8 py-6 border-t border-gray-200 bg-white mt-8">
+          <p className="text-xs text-gray-400 text-center">
             Verified by{" "}
-            <Link href="/" className="text-blue-400 hover:text-blue-300">
+            <Link href="/" className="text-green-600 hover:text-green-700 font-medium">
               Vouch
             </Link>{" "}
-            &mdash; The trusted platform for background-checked candidates
+            — The trusted marketplace for pre-verified candidates
           </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
