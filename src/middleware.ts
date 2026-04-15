@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protected routes that require authentication
-  const protectedRoutes = ["/dashboard", "/admin", "/preview-badge", "/employer", "/onboarding"];
+  const protectedRoutes = ["/dashboard", "/admin", "/employer", "/onboarding"];
   const isProtectedRoute = protectedRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
@@ -97,5 +97,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/preview-badge/:path*", "/employer/:path*", "/onboarding/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/employer/:path*", "/onboarding/:path*"],
 };
