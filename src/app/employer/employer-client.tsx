@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { AchievementBadgesRow } from "@/components/vouch/achievement-badges-row";
 import type { User } from "@supabase/supabase-js";
 
 interface WorkExperience {
@@ -836,10 +837,10 @@ export default function EmployerClient({
                     <img
                       src={selectedCandidate.avatar_url}
                       alt={selectedCandidate.full_name ?? "Candidate"}
-                      className="w-14 h-14 rounded-full object-cover"
+                      className="w-20 h-20 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl">
                       {getInitial(selectedCandidate.full_name)}
                     </div>
                   )}
@@ -849,6 +850,12 @@ export default function EmployerClient({
                       {selectedCandidate.verification_status === "verified" && (
                         <ShieldCheck className="w-5 h-5 text-emerald-500" />
                       )}
+                      {"vouch_score" in selectedCandidate &&
+                        typeof (selectedCandidate as Record<string, unknown>).vouch_score === "number" && (
+                          <Badge variant="secondary" className="ml-1 text-xs font-semibold bg-primary/10 text-primary">
+                            Vouch Score: {String((selectedCandidate as Record<string, unknown>).vouch_score)}
+                          </Badge>
+                        )}
                     </DialogTitle>
                     <DialogDescription className="mt-1">
                       {selectedCandidate.headline}
@@ -879,6 +886,18 @@ export default function EmployerClient({
                   </div>
                 </div>
               )}
+
+              {/* Achievement Badges */}
+              <div className="bg-muted/50 rounded-xl p-4">
+                <AchievementBadgesRow
+                  identity={selectedCandidate.verification_status === "verified"}
+                  workAuth={false}
+                  background={false}
+                  education={!!(selectedCandidate.education && selectedCandidate.education.length > 0)}
+                  references={false}
+                  size="sm"
+                />
+              </div>
 
               {/* Summary */}
               {selectedCandidate.summary && (
@@ -963,6 +982,33 @@ export default function EmployerClient({
                           {edu.start_date ?? "?"} &mdash;{" "}
                           {edu.end_date ?? "?"}
                         </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* References / Vouches */}
+              {"references" in selectedCandidate &&
+                Array.isArray((selectedCandidate as Record<string, unknown>).references) &&
+                ((selectedCandidate as Record<string, unknown>).references as Array<Record<string, unknown>>).length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <Users className="w-4 h-4" /> Vouches &amp; References
+                  </h3>
+                  <div className="space-y-3">
+                    {((selectedCandidate as Record<string, unknown>).references as Array<Record<string, string | null>>).map((ref, idx) => (
+                      <div
+                        key={ref.id ?? idx}
+                        className="rounded-lg border px-4 py-3"
+                      >
+                        <p className="font-medium text-sm">{ref.name ?? "Reference"}</p>
+                        {ref.relationship && (
+                          <p className="text-xs text-muted-foreground">{ref.relationship}</p>
+                        )}
+                        {ref.comment && (
+                          <p className="text-xs text-muted-foreground mt-1 italic">&ldquo;{ref.comment}&rdquo;</p>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import {
   BadgeCheck,
   Camera,
+  CheckCircle2,
   Clock,
   Copy,
   Check,
@@ -13,16 +14,57 @@ import {
   Loader2,
   Lock,
   Circle,
+  Mail,
+  Plus,
   Share2,
   ShieldCheck,
+  Trash2,
+  Users,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
-import type { Profile, VerificationRequest } from "@/lib/types";
+import type { Profile, VerificationRequest, Education } from "@/lib/types";
+import { AddressHistory } from "@/components/dashboard/address-history";
+
+interface VoucherReference {
+  id: string;
+  profile_id: string;
+  referee_name: string;
+  referee_email: string;
+  referee_title: string | null;
+  referee_company: string | null;
+  relationship: string | null;
+  status: string;
+  created_at: string;
+}
+
+const VOUCHER_RELATIONSHIPS = [
+  { value: "manager", label: "Manager" },
+  { value: "colleague", label: "Colleague" },
+  { value: "report", label: "Direct Report" },
+  { value: "client", label: "Client" },
+];
 
 const PersonaInline = dynamic(
   () => import("@/components/vouch/persona-inline"),
@@ -65,6 +107,132 @@ export default function VerifyClient({
   );
   const [uploadingWorkAuth, setUploadingWorkAuth] = useState(false);
   const [savingWorkAuth, setSavingWorkAuth] = useState(false);
+
+  // Education state
+  const [educationList, setEducationList] = useState<Education[]>([]);
+  const [showEduDialog, setShowEduDialog] = useState(false);
+  const [savingEdu, setSavingEdu] = useState(false);
+  const [newEdu, setNewEdu] = useState({
+    institution: "",
+    degree: "",
+    field_of_study: "",
+    start_date: "",
+    end_date: "",
+  });
+
+  // Voucher (references) state
+  const [vouchers, setVouchers] = useState<VoucherReference[]>([]);
+  const [showVoucherDialog, setShowVoucherDialog] = useState(false);
+  const [submittingVoucher, setSubmittingVoucher] = useState(false);
+  const [voucherForm, setVoucherForm] = useState({
+    name: "",
+    email: "",
+    title: "",
+    company: "",
+    relationship: "",
+  });
+
+  // Fetch education entries on mount
+  useEffect(() => {
+    async function fetchEducation() {
+      const { data } = await supabase
+        .from("education")
+        .select("*")
+        .eq("profile_id", user.id)
+        .order("created_at", { ascending: false });
+      if (data) setEducationList(data);
+    }
+    fetchEducation();
+  }, [supabase, user.id]);
+
+  // Fetch voucher references on mount
+  useEffect(() => {
+    async function fetchVouchers() {
+      const { data } = await supabase
+        .from("references")
+        .select("*")
+        .eq("profile_id", user.id)
+        .order("created_at", { ascending: false });
+      if (data) setVouchers(data);
+    }
+    fetchVouchers();
+  }, [supabase, user.id]);
+
+  async function addEducation() {
+    if (!newEdu.institution) return;
+    setSavingEdu(true);
+
+    const { data, error } = await supabase
+      .from("education")
+      .insert({
+        profile_id: user.id,
+        institution: newEdu.institution,
+        degree: newEdu.degree || null,
+        field_of_study: newEdu.field_of_study || null,
+        start_date: newEdu.start_date || null,
+        end_date: newEdu.end_date || null,
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setEducationList([data, ...educationList]);
+      setNewEdu({ institution: "", degree: "", field_of_study: "", start_date: "", end_date: "" });
+      setShowEduDialog(false);
+      toast.success("Education added");
+    } else if (error) {
+      toast.error("Failed to add education", { description: error.message });
+    }
+
+    setSavingEdu(false);
+  }
+
+  async function deleteEducation(id: string) {
+    await supabase.from("education").delete().eq("id", id);
+    setEducationList(educationList.filter((e) => e.id !== id));
+    toast.success("Education removed");
+  }
+
+  async function requestVoucher() {
+    if (!voucherForm.name || !voucherForm.email) return;
+    setSubmittingVoucher(true);
+
+    try {
+      const res = await fetch("/api/references/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: voucherForm.name,
+          email: voucherForm.email,
+          title: voucherForm.title,
+          company: voucherForm.company,
+          relationship: voucherForm.relationship,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to request voucher");
+      }
+
+      const { reference } = await res.json();
+      if (reference) {
+        setVouchers([reference, ...vouchers]);
+      }
+
+      toast.success("Voucher request sent!", {
+        description: `An email has been sent to ${voucherForm.name}`,
+      });
+      setShowVoucherDialog(false);
+      setVoucherForm({ name: "", email: "", title: "", company: "", relationship: "" });
+    } catch (err) {
+      toast.error("Failed to send request", {
+        description: err instanceof Error ? err.message : "Please try again",
+      });
+    } finally {
+      setSubmittingVoucher(false);
+    }
+  }
 
   const publicUrl = profile?.vanity_slug
     ? `/v/${profile.vanity_slug}`
@@ -286,8 +454,11 @@ export default function VerifyClient({
   const isIdentityPending = profile?.verification_status === "pending";
   const hasWorkAuth = !!latestVerification?.immigration_status;
 
+  const hasEducation = educationList.length > 0;
+  const hasVouchers = vouchers.length > 0;
+
   // Calculate verification progress
-  const completedSteps = [isIdentityVerified, hasWorkAuth].filter(Boolean).length;
+  const completedSteps = [isIdentityVerified, hasWorkAuth, hasEducation, hasVouchers].filter(Boolean).length;
   const totalSteps = 4;
   const progressPercent = Math.round((completedSteps / totalSteps) * 100);
 
@@ -455,7 +626,10 @@ export default function VerifyClient({
                   <h3 className="font-[var(--font-headline)] font-bold text-foreground text-lg">
                     Identity Verification
                   </h3>
-                  <p className="text-xs text-muted-foreground">Powered by Persona</p>
+                  <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-primary">verified_user</span>
+                    Powered by Persona
+                  </p>
                 </div>
               </div>
               <StatusBadge status={identityStatus} />
@@ -673,25 +847,261 @@ export default function VerifyClient({
 
             {/* Education */}
             <div className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
-              <span className="material-symbols-outlined text-primary text-2xl">school</span>
+              <div className="flex items-center justify-between">
+                <span className="material-symbols-outlined text-primary text-2xl">school</span>
+                {hasEducation && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+              </div>
               <div>
                 <h4 className="font-semibold text-foreground text-sm">Education</h4>
-                <p className="text-xs text-muted-foreground mt-0.5">Degree verification</p>
+                {educationList.length > 0 ? (
+                  <div className="mt-1.5 space-y-1.5">
+                    {educationList.map((edu) => (
+                      <div key={edu.id} className="flex items-start justify-between gap-1">
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">{edu.institution}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {edu.degree}{edu.field_of_study ? ` in ${edu.field_of_study}` : ""}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => deleteEducation(edu.id)}
+                          className="flex-shrink-0 text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-0.5">Not Added</p>
+                )}
               </div>
               <div className="mt-auto">
-                <StatusBadge status="coming_soon" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => setShowEduDialog(true)}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add Education
+                </Button>
               </div>
             </div>
 
-            {/* Add Reference */}
-            <div className="bg-card rounded-xl border-2 border-dashed border-border p-5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
-              <span className="material-symbols-outlined text-muted-foreground text-3xl">add_circle</span>
-              <h4 className="font-semibold text-muted-foreground text-sm">Add Reference</h4>
-              <p className="text-xs text-muted-foreground text-center">Invite a professional reference</p>
+            {/* Vouchers */}
+            <div className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="material-symbols-outlined text-primary text-2xl">group</span>
+                {vouchers.length > 0 && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+              </div>
+              <div>
+                <h4 className="font-semibold text-foreground text-sm">Vouchers</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {vouchers.length > 0
+                    ? `${vouchers.length} of 3 vouchers added`
+                    : "Add 2-3 people who will vouch for you"}
+                </p>
+                {vouchers.length > 0 && (
+                  <div className="mt-1.5 space-y-1">
+                    {vouchers.map((v) => (
+                      <div key={v.id} className="flex items-center justify-between gap-1">
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">{v.referee_name}</p>
+                          {v.referee_company && (
+                            <p className="text-xs text-muted-foreground truncate">{v.referee_company}</p>
+                          )}
+                        </div>
+                        {v.status === "pending" ? (
+                          <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 text-[10px] px-1.5 py-0">
+                            Pending
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50 text-[10px] px-1.5 py-0">
+                            Done
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="mt-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => setShowVoucherDialog(true)}
+                  disabled={vouchers.length >= 3}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  {vouchers.length >= 3 ? "Max Reached" : "Add Voucher"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Education Dialog ── */}
+      <Dialog open={showEduDialog} onOpenChange={setShowEduDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Education</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="verify-edu-institution">Institution *</Label>
+                <Input
+                  id="verify-edu-institution"
+                  value={newEdu.institution}
+                  onChange={(e) => setNewEdu({ ...newEdu, institution: e.target.value })}
+                  placeholder="University of California, Berkeley"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="verify-edu-degree">Degree</Label>
+                <Input
+                  id="verify-edu-degree"
+                  value={newEdu.degree}
+                  onChange={(e) => setNewEdu({ ...newEdu, degree: e.target.value })}
+                  placeholder="Bachelor of Science"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="verify-edu-field">Field of Study</Label>
+                <Input
+                  id="verify-edu-field"
+                  value={newEdu.field_of_study}
+                  onChange={(e) => setNewEdu({ ...newEdu, field_of_study: e.target.value })}
+                  placeholder="Computer Science"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="verify-edu-start">Start Date</Label>
+                <Input
+                  id="verify-edu-start"
+                  type="date"
+                  value={newEdu.start_date}
+                  onChange={(e) => setNewEdu({ ...newEdu, start_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="verify-edu-end">End Date</Label>
+                <Input
+                  id="verify-edu-end"
+                  type="date"
+                  value={newEdu.end_date}
+                  onChange={(e) => setNewEdu({ ...newEdu, end_date: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowEduDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={addEducation} disabled={!newEdu.institution || savingEdu}>
+              {savingEdu && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {savingEdu ? "Adding..." : "Add Education"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Voucher Dialog ── */}
+      <Dialog open={showVoucherDialog} onOpenChange={setShowVoucherDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request a Voucher</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="voucher-name">Full Name *</Label>
+              <Input
+                id="voucher-name"
+                required
+                placeholder="Jane Smith"
+                value={voucherForm.name}
+                onChange={(e) => setVoucherForm({ ...voucherForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="voucher-email">Email *</Label>
+              <Input
+                id="voucher-email"
+                type="email"
+                required
+                placeholder="jane@company.com"
+                value={voucherForm.email}
+                onChange={(e) => setVoucherForm({ ...voucherForm, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="voucher-title">Job Title</Label>
+              <Input
+                id="voucher-title"
+                placeholder="Engineering Manager"
+                value={voucherForm.title}
+                onChange={(e) => setVoucherForm({ ...voucherForm, title: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="voucher-company">Company</Label>
+              <Input
+                id="voucher-company"
+                placeholder="Acme Inc."
+                value={voucherForm.company}
+                onChange={(e) => setVoucherForm({ ...voucherForm, company: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Relationship</Label>
+              <Select
+                value={voucherForm.relationship}
+                onValueChange={(val) => setVoucherForm({ ...voucherForm, relationship: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select relationship" />
+                </SelectTrigger>
+                <SelectContent>
+                  {VOUCHER_RELATIONSHIPS.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowVoucherDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={requestVoucher}
+              disabled={!voucherForm.name || !voucherForm.email || submittingVoucher}
+            >
+              {submittingVoucher ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Send Request
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Address History ── */}
+      {profile && (
+        <AddressHistory profileId={profile.id} />
+      )}
 
       {/* ── Why Verification Matters ── */}
       <div className="relative bg-card rounded-2xl border border-border overflow-hidden">

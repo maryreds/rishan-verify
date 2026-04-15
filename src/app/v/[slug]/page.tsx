@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
+import { AchievementBadgesRow } from "@/components/vouch/achievement-badges-row";
+import { BadgeActions } from "@/components/vouch/badge-actions";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -263,62 +265,17 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Verification Status Grid */}
+              {/* Verification Badges */}
               <div className="bg-card border border-border rounded-2xl p-6">
-                <h3 className="font-[var(--font-headline)] text-lg font-bold mb-4">Verification Status</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Identity */}
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isVerified ? "bg-primary/10" : "bg-muted"}`}>
-                      <span className={`material-symbols-outlined text-xl ${isVerified ? "text-primary" : "text-muted-foreground"}`}>badge</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Identity</p>
-                      <p className={`text-xs ${isVerified ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                        {isVerified ? "Verified" : "Pending"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Work Auth */}
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${latestVerification?.immigration_status ? "bg-primary/10" : "bg-muted"}`}>
-                      <span className={`material-symbols-outlined text-xl ${latestVerification?.immigration_status ? "text-primary" : "text-muted-foreground"}`}>work</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Work Auth</p>
-                      <p className={`text-xs ${latestVerification?.immigration_status ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                        {latestVerification?.immigration_status || "Pending"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Background */}
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isVerified ? "bg-primary/10" : "bg-muted"}`}>
-                      <span className={`material-symbols-outlined text-xl ${isVerified ? "text-primary" : "text-muted-foreground"}`}>shield</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Background</p>
-                      <p className={`text-xs ${isVerified ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                        {isVerified ? "Clear" : "Pending"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Education */}
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${education && education.length > 0 ? "bg-primary/10" : "bg-muted"}`}>
-                      <span className={`material-symbols-outlined text-xl ${education && education.length > 0 ? "text-primary" : "text-muted-foreground"}`}>school</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Education</p>
-                      <p className={`text-xs ${education && education.length > 0 ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                        {education && education.length > 0 ? "Verified" : "Pending"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <h3 className="font-[var(--font-headline)] text-lg font-bold mb-5">Verification Badges</h3>
+                <AchievementBadgesRow
+                  identity={isVerified}
+                  workAuth={!!latestVerification?.immigration_status}
+                  background={false}
+                  education={!!(education && education.length > 0)}
+                  references={!!(completedRefs && completedRefs.length > 0)}
+                  size="sm"
+                />
               </div>
             </section>
 
@@ -597,23 +554,21 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 <h3 className="font-[var(--font-headline)] font-bold text-lg">Portable Identity</h3>
               </div>
 
-              {/* QR code placeholder */}
-              <div className="bg-white/10 rounded-xl p-4 flex items-center justify-center">
-                <div className="w-32 h-32 bg-white/20 rounded-lg flex items-center justify-center">
-                  <span className="material-symbols-outlined text-5xl opacity-60">qr_code_2</span>
-                </div>
+              {/* QR code */}
+              <div className="bg-white rounded-xl p-3 flex items-center justify-center">
+                <img
+                  alt="Scan to view verified profile"
+                  width={140}
+                  height={140}
+                  className="w-[140px] h-[140px]"
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`https://vouch-app-xi.vercel.app/v/${profile.vanity_slug || profile.public_slug || slug}`)}&bgcolor=ffffff&color=000000&margin=8`}
+                />
               </div>
 
-              <div className="space-y-2">
-                <button className="w-full py-2.5 bg-white text-primary font-semibold rounded-xl text-sm hover:bg-white/90 transition-colors flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-lg">person_add</span>
-                  Hire via Vouch
-                </button>
-                <button className="w-full py-2.5 bg-white/15 text-primary-foreground font-medium rounded-xl text-sm hover:bg-white/25 transition-colors flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-lg">link</span>
-                  Copy Profile Link
-                </button>
-              </div>
+              <BadgeActions
+                profileUrl={`https://vouch-app-xi.vercel.app/v/${profile.vanity_slug || profile.public_slug || slug}`}
+                candidateName={profile.full_name || "this candidate"}
+              />
             </div>
 
             {/* Skills & Expertise */}

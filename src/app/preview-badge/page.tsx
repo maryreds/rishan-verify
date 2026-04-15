@@ -10,6 +10,7 @@ import {
   Briefcase,
   GraduationCap,
 } from "lucide-react";
+import { AchievementBadgesRow } from "@/components/vouch/achievement-badges-row";
 
 // Preview badge with sample data (Ananya Mehta)
 export default function PreviewBadgePage() {
@@ -222,37 +223,14 @@ export default function PreviewBadgePage() {
             Verified Badges
           </p>
           <div className="relative bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] rounded-3xl p-8">
-            <div className="relative flex flex-wrap gap-8 justify-center sm:justify-start items-end">
-              {/* Identity Badge */}
-              <div className="flex flex-col items-center gap-2.5">
-                <div className="w-[108px] h-[108px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-600 to-yellow-800 p-2 shadow-xl">
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-emerald-500 to-emerald-800 flex flex-col items-center justify-center gap-0.5">
-                    <span className="text-xl">&#129706;</span>
-                    <p className="text-[9px] font-black text-white text-center uppercase leading-tight px-1">
-                      IDENTITY
-                    </p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  Identity Verified
-                </p>
-              </div>
-
-              {/* Work Auth Badge */}
-              <div className="flex flex-col items-center gap-2.5">
-                <div className="w-[108px] h-[108px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-600 to-yellow-800 p-2 shadow-xl">
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-blue-800 flex flex-col items-center justify-center gap-0.5">
-                    <span className="text-xl">&#128196;</span>
-                    <p className="text-[9px] font-black text-white text-center uppercase leading-tight px-1">
-                      WORK AUTH
-                    </p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  Work Authorization
-                </p>
-              </div>
-            </div>
+            <AchievementBadgesRow
+              identity={true}
+              workAuth={true}
+              background={false}
+              education={true}
+              references={false}
+              size="lg"
+            />
           </div>
         </div>
 

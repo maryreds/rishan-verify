@@ -246,11 +246,11 @@ export default function ProfileClient({
               <img
                 src={photoUrl}
                 alt="Profile photo"
-                className="w-20 h-20 rounded-full object-cover flex-shrink-0"
+                className="w-32 h-32 rounded-full object-cover flex-shrink-0 border-4 border-background shadow-lg"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <span className="material-symbols-outlined text-muted-foreground text-3xl">person</span>
+              <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center flex-shrink-0 border-4 border-background shadow-lg">
+                <span className="material-symbols-outlined text-muted-foreground text-5xl">person</span>
               </div>
             )}
             <Button
