@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
+import { sendEmail } from "@/lib/email";
+import { vouchReceivedEmail } from "@/lib/email-templates/vouch-received";
 
 export async function POST(request: Request) {
   try {
@@ -13,47 +15,77 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { voucheeId, skill, message } = body;
+    const { voucheeId, voucheeEmail, voucheeName, skill, message } = body;
 
-    if (!voucheeId || !skill) {
+    if (!skill) {
       return NextResponse.json(
-        { error: "Vouchee and skill are required" },
+        { error: "Skill is required" },
+        { status: 400 }
+      );
+    }
+    if (!voucheeId && !voucheeEmail) {
+      return NextResponse.json(
+        { error: "Provide either a candidate or an email" },
         { status: 400 }
       );
     }
 
-    // Check voucher is verified
     const { data: voucherProfile } = await supabase
       .from("profiles")
-      .select("verification_status, vouch_score")
+      .select("full_name, verification_status, vouch_score")
       .eq("id", user.id)
       .single();
 
-    if (!voucherProfile || voucherProfile.verification_status !== "verified") {
-      return NextResponse.json(
-        { error: "You must be verified to vouch for others" },
-        { status: 403 }
-      );
+    const voucherName = voucherProfile?.full_name || "A colleague";
+
+    // If a direct candidate was selected, create the peer_vouch record.
+    if (voucheeId) {
+      if (
+        !voucherProfile ||
+        voucherProfile.verification_status !== "verified"
+      ) {
+        return NextResponse.json(
+          { error: "You must be verified to vouch for others" },
+          { status: 403 }
+        );
+      }
+
+      const { data, error } = await supabase
+        .from("peer_vouches")
+        .insert({
+          voucher_id: user.id,
+          vouchee_id: voucheeId,
+          skill,
+          message: message || null,
+          voucher_score: voucherProfile.vouch_score || 0,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ vouch: data });
     }
 
-    const { data, error } = await supabase
-      .from("peer_vouches")
-      .insert({
-        voucher_id: user.id,
-        vouchee_id: voucheeId,
-        skill,
-        message: message || null,
-        voucher_score: voucherProfile.vouch_score || 0,
-        status: "pending",
-      })
-      .select()
-      .single();
+    // Email-based flow: send an invitation/notification email.
+    const to = String(voucheeEmail).trim();
+    const name = String(voucheeName || "there").trim();
+    const signupUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://vouch-app-xi.vercel.app"}/signup?invited_email=${encodeURIComponent(to)}`;
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    const { subject, html } = vouchReceivedEmail({
+      voucherName,
+      voucheeName: name,
+      skill,
+      message: message || null,
+      signupUrl,
+    });
 
-    return NextResponse.json({ vouch: data });
+    await sendEmail({ to, subject, html });
+
+    return NextResponse.json({ emailed: to });
   } catch (error) {
     console.error("Vouch request error:", error);
     return NextResponse.json(

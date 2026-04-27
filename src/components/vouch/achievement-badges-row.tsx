@@ -23,7 +23,12 @@ export function AchievementBadgesRow({
   className,
 }: AchievementBadgesRowProps) {
   return (
-    <div className={cn("flex items-start justify-center gap-4", className)}>
+    <div
+      className={cn(
+        "flex flex-wrap items-start justify-center gap-3 sm:gap-4",
+        className
+      )}
+    >
       <AchievementBadge pillar="identity" verified={identity} size={size} />
       <AchievementBadge pillar="work-auth" verified={workAuth} size={size} />
       <AchievementBadge pillar="background" verified={background} size={size} />
