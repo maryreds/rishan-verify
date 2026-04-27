@@ -5,3 +5,7 @@ node_modules
 .DS_Store
 *.tsbuildinfo
 .vercel
+
+# Dev-only Supabase scratch files (per-profile seeds, CLI temp dirs)
+supabase/maria_*.sql
+supabase/.temp/
