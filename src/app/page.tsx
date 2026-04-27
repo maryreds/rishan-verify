@@ -288,9 +288,9 @@ export default function HomePage() {
               viewport={{ once: true }}
               custom={1}
               variants={fadeUp}
-              className="col-span-12 md:col-span-8 rounded-3xl bg-card border border-border overflow-hidden flex flex-col sm:flex-row"
+              className="col-span-12 md:col-span-8 rounded-3xl bg-card border border-border overflow-hidden"
             >
-              <div className="p-8 flex flex-col justify-center flex-1">
+              <div className="p-8 flex flex-col justify-center">
                 <div className="w-12 h-12 rounded-2xl bg-secondary-container flex items-center justify-center mb-4">
                   <MaterialIcon
                     name="electric_bolt"
@@ -305,13 +305,6 @@ export default function HomePage() {
                   experience, and credentials in seconds — building your
                   verified profile automatically.
                 </p>
-              </div>
-              <div className="sm:w-64 flex-shrink-0">
-                <img
-                  src="/employers-meeting.png"
-                  alt="Three professionals collaborating in a sunlit, plant-filled workspace"
-                  className="w-full h-full object-cover"
-                />
               </div>
             </motion.div>
 
