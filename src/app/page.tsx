@@ -308,8 +308,8 @@ export default function HomePage() {
               </div>
               <div className="sm:w-64 flex-shrink-0">
                 <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyIcUM7LiXzNtH6J7PmULmIiADg93dIwVHBQB7bIA3Sxm5qESXErQ_GdYXovfr3N1AflR9-WvVXQMKJmwYVIdWCW0du76VfVT2EhOyN3bAdSYI1kNfkRyn0dqYQxcdFA3Ii0Zyq8mgy9foTI4nAOTaOLxshA9cO5EdMO2ujdj4zuqZ4_4SFz7x7MH0tU_qPNgBAjMVRy2FJA8sr0Bjpx2ijOzebSeNfTv6HCvp2pfdeATxrUe9wEvx9uOD5JXTAT9etm2FTyHjdRQ"
-                  alt="AI resume parsing illustration"
+                  src="/employers-meeting.png"
+                  alt="Three professionals collaborating in a sunlit, plant-filled workspace"
                   className="w-full h-full object-cover"
                 />
               </div>
