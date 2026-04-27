@@ -527,7 +527,7 @@ export default function MyProfileClient({
                 background={false}
                 education={education.length > 0}
                 references={completedRefs.length > 0}
-                size="md"
+                size="sm"
               />
             </div>
 
