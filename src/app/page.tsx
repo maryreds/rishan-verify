@@ -408,8 +408,8 @@ export default function HomePage() {
             className="rounded-[2.5rem] overflow-hidden shadow-xl"
           >
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAjqLdVcTGgvbHQQyuSQK92UY_y8I3f6dWBEvPmdsXx8NUKN5V5V41wKMPR3lCab9kqiaU235VAD2nXWK2BluE4-_0AadcEYjUHqZkqMsJYfeBNgQQv8Nsrqjm3G5V59KdPWM5kb7pgtueAHhr42pwzw8C5azqgq1xkrwOsQdqln9SXf-OCTDBUeoXQZmfJMXC2Nm_GaPow4S2TGoa4kg1P_Lw40BRNcgOf4UUcYXKY3U3JDg3tOk6Q944ASobOKHnPxjjM9xcTGk"
-              alt="Employer dashboard showing verified candidates"
+              src="/employers-meeting.png"
+              alt="Three professionals collaborating in a sunlit, plant-filled workspace"
               className="w-full h-auto object-cover"
             />
           </motion.div>
