@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import crypto from "crypto";
 
 const PERSONA_WEBHOOK_SECRET = process.env.PERSONA_WEBHOOK_SECRET;
@@ -15,10 +15,14 @@ function verifyWebhookSignature(
   hmac.update(payload);
   const expectedSignature = hmac.digest("hex");
 
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+  const sigBuf = Buffer.from(signature);
+  const expectedBuf = Buffer.from(expectedSignature);
+
+  // timingSafeEqual throws on length mismatch — guard explicitly so a bogus
+  // signature returns false instead of crashing the route.
+  if (sigBuf.length !== expectedBuf.length) return false;
+
+  return crypto.timingSafeEqual(sigBuf, expectedBuf);
 }
 
 export async function POST(request: Request) {
@@ -60,7 +64,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   try {
     switch (eventType) {

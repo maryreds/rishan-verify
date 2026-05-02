@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { enhanceDescription } from "@/lib/ai/services/portfolio-summarizer";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAuth();
+    if (!auth.ok) return auth.response;
+
     const body = await request.json();
     const { title, url, description } = body;
 

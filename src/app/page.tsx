@@ -266,8 +266,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             custom={0}
             variants={fadeUp}
             className="text-center mb-16"
@@ -284,8 +283,7 @@ export default function HomePage() {
             {/* 8-col: Instant AI Parsing */}
             <motion.div
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               custom={1}
               variants={fadeUp}
               className="col-span-12 md:col-span-8 rounded-3xl bg-card border border-border overflow-hidden"
@@ -311,8 +309,7 @@ export default function HomePage() {
             {/* 4-col: Vouch Score */}
             <motion.div
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               custom={2}
               variants={fadeUp}
               className="col-span-12 sm:col-span-6 md:col-span-4 rounded-3xl bg-primary text-white p-8 flex flex-col justify-between min-h-[260px]"
@@ -336,8 +333,7 @@ export default function HomePage() {
             {/* 4-col: Portable Identity */}
             <motion.div
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               custom={3}
               variants={fadeUp}
               className="col-span-12 sm:col-span-6 md:col-span-4 rounded-3xl bg-card border border-border p-8 flex flex-col justify-between min-h-[260px]"
@@ -362,8 +358,7 @@ export default function HomePage() {
             {/* 8-col: 24/7 AI Coach */}
             <motion.div
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               custom={4}
               variants={fadeUp}
               className="col-span-12 md:col-span-8 rounded-3xl bg-card border border-border p-8 flex flex-col sm:flex-row items-center gap-6 min-h-[200px]"
@@ -395,8 +390,7 @@ export default function HomePage() {
           {/* Left — image */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="rounded-[2.5rem] overflow-hidden shadow-xl"
           >
@@ -410,8 +404,7 @@ export default function HomePage() {
           {/* Right — content */}
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             variants={stagger}
           >
             <motion.span
@@ -499,8 +492,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             custom={0}
             variants={fadeUp}
             className="text-center mb-16"
@@ -519,9 +511,8 @@ export default function HomePage() {
               <motion.div
                 key={t.name}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                custom={i + 1}
+                animate="visible"
+                  custom={i + 1}
                 variants={fadeUp}
                 className="relative bg-card border border-border rounded-2xl p-8"
               >
@@ -556,8 +547,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             custom={0}
             variants={fadeUp}
             className="text-center mb-16"
@@ -574,8 +564,7 @@ export default function HomePage() {
             {/* Growth */}
             <motion.div
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               custom={1}
               variants={fadeUp}
               className="flex flex-col p-8 rounded-2xl border border-border bg-card"
@@ -630,8 +619,7 @@ export default function HomePage() {
             {/* Enterprise — Featured */}
             <motion.div
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               custom={2}
               variants={fadeUp}
               className="relative flex flex-col p-8 rounded-2xl bg-primary text-white shadow-2xl scale-100 md:scale-105"
@@ -696,8 +684,7 @@ export default function HomePage() {
             {/* Institutional */}
             <motion.div
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               custom={3}
               variants={fadeUp}
               className="flex flex-col p-8 rounded-2xl border border-border bg-card"
@@ -756,8 +743,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto bg-gradient-to-br from-primary to-primary-container rounded-[3rem] px-8 py-16 sm:px-16 sm:py-20 text-center">
           <motion.h2
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             custom={0}
             variants={fadeUp}
             className="font-[var(--font-headline)] text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight"
@@ -766,8 +752,7 @@ export default function HomePage() {
           </motion.h2>
           <motion.p
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             custom={1}
             variants={fadeUp}
             className="mt-4 text-white/80 text-lg max-w-xl mx-auto"
@@ -777,8 +762,7 @@ export default function HomePage() {
           </motion.p>
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             custom={2}
             variants={fadeUp}
             className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
@@ -867,35 +851,27 @@ export default function HomePage() {
               <ul className="space-y-3">
                 <li>
                   <a
-                    href="#"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
+                    href="mailto:hello@knomadic.io"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Contact
                   </a>
+                </li>
+                <li>
+                  <Link
+                    href="/employer/marketplace"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    For Employers
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/signup?role=candidate"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Get Verified
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -907,28 +883,28 @@ export default function HomePage() {
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/privacy"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/terms"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Terms of Service
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/cookies"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Cookie Policy
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

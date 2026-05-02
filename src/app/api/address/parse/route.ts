@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAIProvider } from "@/lib/ai";
-import { createClient } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 interface ParsedAddress {
   street: string | null;
@@ -32,11 +32,14 @@ Rules:
 
 export async function POST(request: Request) {
   try {
-    const { imageBase64, profileId } = await request.json();
+    const auth = await requireAuth();
+    if (!auth.ok) return auth.response;
 
-    if (!imageBase64 || !profileId) {
+    const { imageBase64 } = await request.json();
+
+    if (!imageBase64) {
       return NextResponse.json(
-        { error: "Missing imageBase64 or profileId" },
+        { error: "Missing imageBase64" },
         { status: 400 }
       );
     }
@@ -77,12 +80,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Save to Supabase
-    const supabase = await createClient();
-    const { data, error } = await supabase
+    // Save to Supabase — profile_id is taken from the authenticated session, NEVER from the request body
+    const { data, error } = await auth.supabase
       .from("address_history")
       .insert({
-        profile_id: profileId,
+        profile_id: auth.userId,
         street: parsed.street,
         city: parsed.city,
         state: parsed.state,

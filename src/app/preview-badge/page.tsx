@@ -128,7 +128,7 @@ export default function PreviewBadgePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/80 flex">
+    <div className="min-h-screen bg-gray-50/80 flex overflow-x-hidden">
       {/* ── Left Sidebar ── */}
       <aside className="hidden lg:flex w-[220px] flex-col bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-40">
         <div className="px-5 py-5 border-b border-gray-100">
@@ -183,8 +183,8 @@ export default function PreviewBadgePage() {
       {/* ── Main Content ── */}
       <main className="flex-1 lg:ml-[220px]">
         {/* Breadcrumb */}
-        <div className="bg-white border-b border-gray-200 px-8 py-3">
-          <div className="flex items-center gap-1.5 text-sm text-gray-400">
+        <div className="bg-white border-b border-gray-200 px-4 md:px-8 py-3">
+          <div className="flex flex-wrap items-center gap-1.5 text-sm text-gray-400">
             <Link href="/" className="hover:text-gray-600 transition-colors">Vouch</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <Link href="/" className="hover:text-gray-600 transition-colors">Marketplace</Link>
@@ -193,7 +193,7 @@ export default function PreviewBadgePage() {
           </div>
         </div>
 
-        <div className="px-8 py-8 max-w-6xl">
+        <div className="px-4 md:px-8 py-8 max-w-6xl">
           {/* ── Profile Header ── */}
           <div className="flex flex-col sm:flex-row items-start justify-between gap-6 mb-8">
             <div className="flex items-start gap-5">
@@ -234,7 +234,7 @@ export default function PreviewBadgePage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-700 text-white text-sm font-medium rounded-lg hover:bg-green-800 transition-colors shadow-sm">
                 <Plus className="w-4 h-4" />
                 Add to Pipeline
@@ -423,7 +423,7 @@ export default function PreviewBadgePage() {
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-6 border-t border-gray-200 bg-white mt-8">
+        <div className="px-4 md:px-8 py-6 border-t border-gray-200 bg-white mt-8">
           <p className="text-xs text-gray-400 text-center">
             Verified by{" "}
             <Link href="/" className="text-green-600 hover:text-green-700 font-medium">

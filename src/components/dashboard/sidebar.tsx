@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -19,7 +20,6 @@ const navItems = [
 
 const bottomItems = [
   { href: "/dashboard/settings", label: "Settings", icon: "settings" },
-  { href: "/logout", label: "Logout", icon: "logout" },
 ];
 
 interface DashboardSidebarProps {
@@ -30,6 +30,14 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ userName, vouchScore, photoUrl }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <aside className="fixed left-0 top-0 w-64 h-screen bg-[#f5f4f0] p-6 flex flex-col z-30">
@@ -110,6 +118,15 @@ export function DashboardSidebar({ userName, vouchScore, photoUrl }: DashboardSi
             </Link>
           );
         })}
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-[#414944] hover:bg-zinc-200/50 hover:translate-x-1 transition-all duration-200"
+        >
+          <span className="material-symbols-outlined text-xl">logout</span>
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );

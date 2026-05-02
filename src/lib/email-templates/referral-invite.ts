@@ -12,7 +12,7 @@ export function referralInviteEmail({
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 0;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <span style="font-size: 20px; font-weight: 700; color: #0D7C66;">&#9745; Vouch</span>
+          <span style="font-size: 20px; font-weight: 700; color: #265140;">&#9745; Vouch</span>
         </div>
         <h1 style="font-size: 22px; font-weight: 600; color: #1A1A1A; margin-bottom: 8px;">
           You&rsquo;ve been invited!
@@ -24,7 +24,7 @@ export function referralInviteEmail({
           Build your Vouch Profile, verify your credentials, and let opportunities come to you.
         </p>
         <div style="text-align: center; margin: 32px 0;">
-          <a href="${signupUrl}" style="display: inline-block; padding: 14px 32px; background: #0D7C66; color: #ffffff; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 10px;">
+          <a href="${signupUrl}" style="display: inline-block; padding: 14px 32px; background: #265140; color: #ffffff; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 10px;">
             Join Vouch Free
           </a>
         </div>

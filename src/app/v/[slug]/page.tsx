@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase-server";
 import { AchievementBadgesRow } from "@/components/vouch/achievement-badges-row";
 import { BadgeActions } from "@/components/vouch/badge-actions";
@@ -8,21 +9,82 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function PublicProfilePage({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Look up by vanity_slug first, then public_slug for backward compat
+  const cols =
+    "full_name, headline, location, vouch_score, verification_status";
   let { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select(cols)
     .eq("vanity_slug", slug)
     .single();
 
   if (!profile) {
     const { data: fallback } = await supabase
       .from("profiles")
-      .select("*")
+      .select(cols)
+      .eq("public_slug", slug)
+      .single();
+    profile = fallback;
+  }
+
+  if (!profile) {
+    return {
+      title: "Profile not found · Vouch",
+    };
+  }
+
+  const isVerified = profile.verification_status === "verified";
+  const namePart = profile.full_name || "Vouch member";
+  const headlinePart = profile.headline || "Verified candidate";
+  const score = profile.vouch_score ?? 0;
+  const verifiedTag = isVerified ? " · Vouch Verified" : "";
+  const title = `${namePart} — ${headlinePart}${verifiedTag} · Vouch`;
+  const description = isVerified
+    ? `${namePart}'s verified Vouch profile. Vouch Score ${score}. Identity, work auth, and references checked.`
+    : `${namePart}'s Vouch profile. Building a verified candidate trust mark.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
+export default async function PublicProfilePage({ params }: PageProps) {
+  const { slug } = await params;
+  const supabase = await createClient();
+
+  // Explicit allowlist of fields safe for public exposure. Never use SELECT *
+  // here — the profiles row contains email, phone, stripe_customer_id, raw
+  // resume JSON, is_admin, and other PII/auth fields.
+  const PUBLIC_PROFILE_COLUMNS =
+    "id, full_name, headline, location, summary, summary_ai, photo_original_url, photo_enhanced_url, vanity_slug, public_slug, verification_status, vouch_score, video_intro_url, skills";
+
+  // Look up by vanity_slug first, then public_slug for backward compat
+  let { data: profile } = await supabase
+    .from("profiles")
+    .select(PUBLIC_PROFILE_COLUMNS)
+    .eq("vanity_slug", slug)
+    .single();
+
+  if (!profile) {
+    const { data: fallback } = await supabase
+      .from("profiles")
+      .select(PUBLIC_PROFILE_COLUMNS)
       .eq("public_slug", slug)
       .single();
     profile = fallback;
@@ -568,6 +630,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
               <BadgeActions
                 profileUrl={`https://vouch-app-xi.vercel.app/v/${profile.vanity_slug || profile.public_slug || slug}`}
                 candidateName={profile.full_name || "this candidate"}
+                vouchScore={vouchScore}
               />
             </div>
 
