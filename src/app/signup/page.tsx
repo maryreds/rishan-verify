@@ -166,13 +166,21 @@ function SignupForm() {
                   />
                   <label htmlFor="terms" className="text-xs text-muted-foreground">
                     I agree to the{" "}
-                    <a href="#" className="font-medium text-primary hover:underline">
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      className="font-medium text-primary hover:underline"
+                    >
                       Terms of Service
-                    </a>{" "}
+                    </Link>{" "}
                     and{" "}
-                    <a href="#" className="font-medium text-primary hover:underline">
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      className="font-medium text-primary hover:underline"
+                    >
                       Privacy Policy
-                    </a>
+                    </Link>
                     . I consent to Vouch collecting and verifying my
                     professional credentials.
                   </label>
