@@ -22,9 +22,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+    if (!ALLOWED_MIME.includes(file.type)) {
+      return NextResponse.json(
+        { error: "Unsupported file type. Use JPEG, PNG, or WEBP." },
+        { status: 400 }
+      );
+    }
+
+    const MAX_SIZE = 8 * 1024 * 1024; // 8 MB
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: "File too large. Maximum size is 8 MB." },
+        { status: 400 }
+      );
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const filePath = `${user.id}/headshot-${Date.now()}-${file.name}`;
+    // Sanitize filename: strip path separators and any leading dots to prevent traversal
+    const safeName = file.name.replace(/[/\\]/g, "_").replace(/^\.+/, "");
+    const filePath = `${user.id}/headshot-${Date.now()}-${safeName}`;
 
     // Upload to storage
     const { error: uploadError } = await supabase.storage

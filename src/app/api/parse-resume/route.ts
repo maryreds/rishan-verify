@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
 import { parseResume, parseResumeFromImage } from "@/lib/ai/services/resume-parser";
+import { requireAuth } from "@/lib/api-auth";
 
 // ---------- Gemini fallback (kept for AI_PROVIDER=gemini) ----------
 
@@ -100,12 +101,14 @@ const useOpenAI = () => {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAuth();
+    if (!auth.ok) return auth.response;
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const userId = formData.get("userId") as string | null;
 
-    if (!file || !userId) {
-      return NextResponse.json({ error: "Missing file or userId" }, { status: 400 });
+    if (!file) {
+      return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
 
     const fileName = file.name.toLowerCase();

@@ -12,17 +12,23 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const { slug } = await params;
   const supabase = await createClient();
 
+  // Explicit allowlist of fields safe for public exposure. Never use SELECT *
+  // here — the profiles row contains email, phone, stripe_customer_id, raw
+  // resume JSON, is_admin, and other PII/auth fields.
+  const PUBLIC_PROFILE_COLUMNS =
+    "id, full_name, headline, location, summary, summary_ai, photo_original_url, photo_enhanced_url, vanity_slug, public_slug, verification_status, vouch_score, video_intro_url, skills";
+
   // Look up by vanity_slug first, then public_slug for backward compat
   let { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select(PUBLIC_PROFILE_COLUMNS)
     .eq("vanity_slug", slug)
     .single();
 
   if (!profile) {
     const { data: fallback } = await supabase
       .from("profiles")
-      .select("*")
+      .select(PUBLIC_PROFILE_COLUMNS)
       .eq("public_slug", slug)
       .single();
     profile = fallback;
