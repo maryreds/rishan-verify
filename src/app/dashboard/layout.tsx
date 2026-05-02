@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
+import { DashboardMobileTopNav } from "@/components/dashboard/mobile-top-nav";
 
 export default async function DashboardLayout({
   children,
@@ -23,14 +24,21 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
+  const userName =
+    profile?.full_name || user.email?.split("@")[0] || "Candidate";
+
   return (
     <div className="min-h-screen bg-[#faf9f5]">
       <DashboardSidebar
-        userName={profile?.full_name || user.email?.split("@")[0] || "Candidate"}
+        userName={userName}
         vouchScore={profile?.vouch_score ?? 0}
         photoUrl={profile?.photo_original_url || null}
       />
-      <main className="ml-64 min-h-screen p-8 lg:p-12 bg-[#faf9f5]">
+      <DashboardMobileTopNav
+        userName={userName}
+        photoUrl={profile?.photo_original_url || null}
+      />
+      <main className="md:ml-64 min-h-screen p-4 pt-20 md:pt-12 md:p-12 md:pl-12 bg-[#faf9f5] overflow-x-hidden">
         {children}
       </main>
     </div>

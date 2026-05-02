@@ -216,7 +216,7 @@ export default function MyProfileClient({
   };
 
   return (
-    <div className="bg-gray-50/80 -m-8 lg:-m-12 p-8">
+    <div className="bg-gray-50/80 -m-4 md:-m-8 lg:-m-12 p-4 md:p-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         {/* ── Profile Header ── */}
         <div className="flex flex-col sm:flex-row items-start justify-between gap-6 mb-8">
