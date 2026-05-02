@@ -484,7 +484,7 @@ export default function EmployerMarketplacePage() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-[#faf9f5]">
+      <div className="min-h-screen bg-[#faf9f5] overflow-x-hidden">
         {/* ─── Top Nav (fixed) ─── */}
         <nav className="fixed top-0 left-0 right-0 z-50 bg-[#faf9f5]/80 backdrop-blur-md border-b border-border/40">
           <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
@@ -547,7 +547,7 @@ export default function EmployerMarketplacePage() {
                     className="pl-11 h-12 bg-transparent border-0 shadow-none focus-visible:ring-0 text-base"
                   />
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex flex-wrap items-center gap-2 sm:flex-shrink-0">
                   <Select value={locationFilter} onValueChange={setLocationFilter}>
                     <SelectTrigger className="h-10 rounded-2xl bg-muted/60 border-0 text-sm px-4 w-auto min-w-[120px]">
                       <span className="material-symbols-outlined text-[16px] mr-1.5 text-muted-foreground">location_on</span>
@@ -580,7 +580,7 @@ export default function EmployerMarketplacePage() {
                     More Filters
                   </button>
                   <button
-                    className="h-10 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-semibold hover:from-emerald-600 hover:to-green-600 transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2"
+                    className="h-10 px-6 rounded-2xl bg-gradient-to-r from-primary to-primary-container text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-md shadow-primary/20 flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[18px]">search</span>
                     Search Talent
@@ -626,12 +626,12 @@ export default function EmployerMarketplacePage() {
               {/* Vouch Verification Badges */}
               <div className="bg-white rounded-2xl border border-border/40 p-5">
                 <h3 className="font-[var(--font-headline)] text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-emerald-500">verified_user</span>
+                  <span className="material-symbols-outlined text-[18px] text-primary">verified_user</span>
                   Vouch Verification
                 </h3>
                 <div className="space-y-3">
                   {[
-                    { label: "Identity Verified", icon: "fingerprint", desc: "Government ID confirmed", color: "text-emerald-600", bg: "bg-emerald-50" },
+                    { label: "Identity Verified", icon: "fingerprint", desc: "Government ID confirmed", color: "text-primary", bg: "bg-primary-fixed" },
                     { label: "Work Authorization", icon: "gavel", desc: "Legal work status confirmed", color: "text-blue-600", bg: "bg-blue-50" },
                     { label: "Criminal Background", icon: "shield", desc: "Background check cleared", color: "text-purple-600", bg: "bg-purple-50" },
                   ].map(({ label, icon, desc, color, bg }) => (
@@ -808,7 +808,7 @@ export default function EmployerMarketplacePage() {
                           alt={selectedCandidate.full_name}
                           className="w-16 h-16 rounded-2xl object-cover ring-2 ring-background shadow-md"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center">
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary border-2 border-background flex items-center justify-center">
                           <ShieldCheck className="w-3 h-3 text-white" />
                         </div>
                       </div>
@@ -841,7 +841,7 @@ export default function EmployerMarketplacePage() {
                       <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         Verification Status
                       </span>
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
+                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px]">
                         {pillarCount(selectedCandidate.verification_pillars)}/5 Passed
                       </Badge>
                     </div>
@@ -854,7 +854,7 @@ export default function EmployerMarketplacePage() {
                               <div
                                 className={`flex flex-col items-center gap-1.5 rounded-lg py-2.5 px-1 text-center transition-colors cursor-default ${
                                   passed
-                                    ? "bg-emerald-500/8 text-emerald-600 dark:text-emerald-400"
+                                    ? "bg-primary/10 text-primary"
                                     : "bg-muted/40 text-muted-foreground/40"
                                 }`}
                               >
@@ -1053,9 +1053,9 @@ function CandidateCard({ candidate, isSaved, onToggleSave, onViewProfile }: Cand
             return (
               <Tooltip key={key}>
                 <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1">
-                    <span className="material-symbols-outlined text-[14px] text-emerald-600">verified</span>
-                    <span className="text-[11px] font-medium text-emerald-700">{label}</span>
+                  <div className="flex items-center gap-1 rounded-lg bg-primary-fixed px-2 py-1">
+                    <span className="material-symbols-outlined text-[14px] text-primary">verified</span>
+                    <span className="text-[11px] font-medium text-primary">{label}</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
@@ -1065,8 +1065,8 @@ function CandidateCard({ candidate, isSaved, onToggleSave, onViewProfile }: Cand
             );
           })}
           {PILLAR_CONFIG.slice(3).some(({ key }) => candidate.verification_pillars[key]) && (
-            <div className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1">
-              <span className="text-[11px] font-medium text-emerald-700">
+            <div className="flex items-center gap-1 rounded-lg bg-primary-fixed px-2 py-1">
+              <span className="text-[11px] font-medium text-primary">
                 +{PILLAR_CONFIG.slice(3).filter(({ key }) => candidate.verification_pillars[key]).length} more
               </span>
             </div>
@@ -1092,7 +1092,7 @@ function CandidateCard({ candidate, isSaved, onToggleSave, onViewProfile }: Cand
       <div className="flex items-center gap-2 mt-5 pt-4 border-t border-border/40">
         <Link
           href={`/employer/candidate/${candidate.id}`}
-          className="flex-1 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-semibold hover:from-emerald-600 hover:to-green-600 transition-all shadow-sm shadow-emerald-500/20 flex items-center justify-center gap-2"
+          className="flex-1 h-10 rounded-xl bg-gradient-to-r from-primary to-primary-container text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-sm shadow-primary/20 flex items-center justify-center gap-2"
           onClick={(e) => { e.stopPropagation(); }}
         >
           <span className="material-symbols-outlined text-[18px]">visibility</span>
