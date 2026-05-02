@@ -851,35 +851,27 @@ export default function HomePage() {
               <ul className="space-y-3">
                 <li>
                   <a
-                    href="#"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
+                    href="mailto:hello@knomadic.io"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Contact
                   </a>
+                </li>
+                <li>
+                  <Link
+                    href="/employer/marketplace"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    For Employers
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/signup?role=candidate"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Get Verified
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -891,28 +883,28 @@ export default function HomePage() {
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/privacy"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/terms"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Terms of Service
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/cookies"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Cookie Policy
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
