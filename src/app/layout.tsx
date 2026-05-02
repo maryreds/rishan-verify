@@ -46,7 +46,7 @@ export default function RootLayout({
           <TooltipProvider>
             {children}
           </TooltipProvider>
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

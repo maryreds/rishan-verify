@@ -297,6 +297,20 @@ export default function OnboardingClient({
       }
 
       const skillCount = parsed.skills?.length || 0;
+
+      // Seed parsedSkills from the resume parse immediately so the chips
+      // show even if the categorization API is slow / fails. The follow-up
+      // call to /api/ai/extract-skills enriches with category + replaces.
+      if (Array.isArray(parsed.skills) && parsed.skills.length > 0) {
+        setParsedSkills(
+          parsed.skills.map((name: string) => ({
+            name,
+            category: "Skill",
+            selected: true,
+          }))
+        );
+      }
+
       try {
         const skillsRes = await fetch("/api/ai/extract-skills", {
           method: "POST",
@@ -316,6 +330,31 @@ export default function OnboardingClient({
         }
       } catch {
         // Non-blocking
+      }
+
+      // If the parser didn't extract a summary, auto-generate one from
+      // headline + skills so the Profile step never shows an empty Summary
+      // field for a fresh signup. The user can edit before saving.
+      if (!parsed.summary && (parsed.headline || (parsed.skills?.length ?? 0) > 0)) {
+        try {
+          const summaryRes = await fetch("/api/ai/generate-summary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              full_name: parsed.full_name || "",
+              headline: parsed.headline || "",
+              skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+            }),
+          });
+          if (summaryRes.ok) {
+            const { summary } = await summaryRes.json();
+            if (summary) {
+              setForm((f) => ({ ...f, summary }));
+            }
+          }
+        } catch {
+          // Non-blocking — leave summary empty if generation fails
+        }
       }
 
       setParseStats({ experience: expCount, education: eduCount, skills: skillCount });

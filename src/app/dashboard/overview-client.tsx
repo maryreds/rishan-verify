@@ -10,6 +10,19 @@ import { InterestSignals } from "@/components/dashboard/interest-signals";
 import type { User } from "@supabase/supabase-js";
 import type { Profile, WorkExperience, Education, VerificationRequest } from "@/lib/types";
 
+function relativeTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  const days = Math.max(0, Math.floor((now - then) / 86400000));
+  if (days === 0) return "today";
+  if (days === 1) return "1d ago";
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+  return `${Math.floor(days / 365)}y ago`;
+}
+
 interface OverviewProps {
   user: User;
   profile: Profile | null;
@@ -36,6 +49,10 @@ export default function DashboardOverview({
   const [generatingSlug, setGeneratingSlug] = useState(false);
   const headshotInputRef = useRef<HTMLInputElement>(null);
   const [salaryRange, setSalaryRange] = useState<string | null>(null);
+  const [recentVouches, setRecentVouches] = useState<
+    { name: string; role: string; skill: string; time: string }[]
+  >([]);
+  const [vouchesLoaded, setVouchesLoaded] = useState(false);
 
   const verificationStatus = profile?.verification_status;
 
@@ -56,6 +73,26 @@ export default function DashboardOverview({
         }
       })
       .catch(() => {});
+
+    fetch("/api/vouches/list?type=received&status=accepted")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const list = (data?.vouches || []).slice(0, 3).map(
+          (v: {
+            skill?: string;
+            created_at?: string;
+            voucher?: { full_name?: string; headline?: string };
+          }) => ({
+            name: v.voucher?.full_name || "Anonymous",
+            role: v.voucher?.headline || "Verified peer",
+            skill: v.skill || "Endorsement",
+            time: relativeTime(v.created_at),
+          })
+        );
+        setRecentVouches(list);
+      })
+      .catch(() => {})
+      .finally(() => setVouchesLoaded(true));
   }, []);
 
   async function handleHeadshotUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -159,13 +196,6 @@ export default function DashboardOverview({
         : verificationStatus !== "verified"
           ? "Verify your identity to unlock the full Vouch Score (up to +30 pts)."
           : "Your profile is looking great! Keep it updated for best results.";
-
-  // Placeholder vouch data
-  const recentVouches = [
-    { name: "Alex Chen", role: "Engineering Manager @ Stripe", skill: "System Design", time: "2d ago" },
-    { name: "Sarah Kim", role: "Staff Engineer @ Vercel", skill: "React & Next.js", time: "5d ago" },
-    { name: "Marcus Lee", role: "CTO @ Ramp", skill: "Leadership", time: "1w ago" },
-  ];
 
   const skillCount = profile?.skills?.length || 0;
 
@@ -373,25 +403,44 @@ export default function DashboardOverview({
           </div>
 
           <div className="space-y-4">
-            {recentVouches.map((vouch, i) => (
-              <div
-                key={i}
-                className="bg-background rounded-lg p-4 flex items-start justify-between"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{vouch.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{vouch.role}</p>
-                  <span className="inline-block mt-2 px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-medium rounded-full">
-                    {vouch.skill}
-                  </span>
+            {recentVouches.length > 0 ? (
+              recentVouches.map((vouch, i) => (
+                <div
+                  key={i}
+                  className="bg-background rounded-lg p-4 flex items-start justify-between"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{vouch.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{vouch.role}</p>
+                    <span className="inline-block mt-2 px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-medium rounded-full">
+                      {vouch.skill}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">{vouch.time}</span>
                 </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">{vouch.time}</span>
+              ))
+            ) : (
+              <div className="bg-background rounded-lg p-6 text-center">
+                <span className="material-symbols-outlined text-muted-foreground text-3xl">
+                  thumb_up
+                </span>
+                <p className="text-sm font-medium text-foreground mt-2">
+                  No vouches yet
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {vouchesLoaded
+                    ? "Invite a colleague to vouch for one of your skills."
+                    : "Loading…"}
+                </p>
               </div>
-            ))}
+            )}
           </div>
 
-          <button className="mt-5 flex items-center gap-1 text-sm text-primary font-medium hover:underline">
-            View all 24 vouches
+          <button
+            onClick={() => router.push("/dashboard/vouches")}
+            className="mt-5 flex items-center gap-1 text-sm text-primary font-medium hover:underline"
+          >
+            {recentVouches.length > 0 ? "View all vouches" : "Request a vouch"}
             <span className="material-symbols-outlined text-lg">arrow_forward</span>
           </button>
         </div>
