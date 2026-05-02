@@ -110,6 +110,10 @@ interface Profile {
   photo_original_url: string | null;
   vouch_score: number | null;
   verification_status: string | null;
+  vanity_slug: string | null;
+  public_slug: string | null;
+  published_at: string | null;
+  onboarding_completed_at: string | null;
   [key: string]: unknown;
 }
 
@@ -152,6 +156,7 @@ export default function OnboardingClient({
   const [verificationStatus, setVerificationStatus] = useState<string | null>(
     profile?.verification_status || null
   );
+  const [publishing, setPublishing] = useState(false);
 
   const [form, setForm] = useState({
     full_name: profile?.full_name || user.user_metadata?.full_name || "",
@@ -570,6 +575,136 @@ export default function OnboardingClient({
     toast.success("Welcome to Vouch! Your profile is live.");
     router.push("/dashboard");
     router.refresh();
+  }
+
+  // ─── Publish (Quick Verify path) ───
+  // Saves whatever's filled in, generates a vanity slug if needed, marks the
+  // profile as published, and routes to the post-publish share screen. Pillars
+  // not yet earned (references, peer vouches) appear "pending" on the public
+  // badge until the candidate completes those slow flows from the dashboard.
+  async function publishProfile() {
+    if (publishing) return;
+    setPublishing(true);
+
+    try {
+      // 1. Save the latest form state (user may have edited fields earlier
+      //    without saving on every keystroke).
+      const skillsArr = form.skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const domainsArr = form.domains
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      // 2. Generate a vanity slug if the candidate doesn't have one yet.
+      //    Format: ${first_name_slug}-${random_4_chars} (lowercase). Mirrors
+      //    the pattern used in dashboard/overview-client.tsx so links stay
+      //    consistent.
+      let slug = profile?.vanity_slug || profile?.public_slug || null;
+      if (!slug) {
+        const firstName = (form.full_name || "candidate").split(" ")[0] || "candidate";
+        const base = firstName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "") || "candidate";
+        const suffix = Math.random().toString(36).substring(2, 6);
+        slug = `${base}-${suffix}`;
+      }
+
+      // 3. Persist everything in a single update so the redirect target is
+      //    immediately consistent.
+      const nowIso = new Date().toISOString();
+      const updatePayload: Record<string, unknown> = {
+        full_name: form.full_name,
+        phone: form.phone,
+        location: form.location,
+        headline: form.headline,
+        summary: form.summary,
+        skills: skillsArr,
+        domains: domainsArr,
+        onboarding_step: STEPS.length,
+        published_at: profile?.published_at || nowIso,
+        vanity_slug: slug,
+        public_slug: profile?.public_slug || slug,
+      };
+      if (!profile?.onboarding_completed_at) {
+        updatePayload.onboarding_completed_at = nowIso;
+      }
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update(updatePayload)
+        .eq("id", user.id);
+
+      if (updateError) {
+        toast.error("Could not publish profile", {
+          description: updateError.message,
+        });
+        setPublishing(false);
+        return;
+      }
+
+      // 4. Persist any selected skills (non-blocking — same as finishOnboarding).
+      await saveSkills();
+
+      try {
+        await fetch("/api/profile/vouch-score", { method: "POST" });
+      } catch {
+        // Non-blocking
+      }
+
+      router.push("/onboarding/published");
+      router.refresh();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong publishing.";
+      toast.error("Publish failed", { description: message });
+      setPublishing(false);
+    }
+  }
+
+  // ─── Slow path: build full 5-pillar profile ───
+  // Saves the form (so nothing is lost) but does NOT mark the profile as
+  // published. Routes the candidate into the references collection flow.
+  async function startSlowPath() {
+    if (publishing) return;
+    setPublishing(true);
+    try {
+      const skillsArr = form.skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const domainsArr = form.domains
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      await supabase
+        .from("profiles")
+        .update({
+          full_name: form.full_name,
+          phone: form.phone,
+          location: form.location,
+          headline: form.headline,
+          summary: form.summary,
+          skills: skillsArr,
+          domains: domainsArr,
+          // Note: NO published_at, NO onboarding_completed_at — they're
+          // explicitly choosing the slow path and will publish later.
+        })
+        .eq("id", user.id);
+
+      await saveSkills();
+      router.push("/dashboard/references");
+      router.refresh();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not save profile.";
+      toast.error("Save failed", { description: message });
+      setPublishing(false);
+    }
   }
 
   function goNext() {
@@ -1306,8 +1441,9 @@ export default function OnboardingClient({
                   You&apos;re ready to launch!
                 </h2>
                 <p className="text-muted-foreground mt-2">
-                  Here&apos;s a preview of your Vouch profile. Hit publish to go
-                  live.
+                  Publish now and your verified pillars go live instantly.
+                  References &amp; peer vouches keep filling in over the next
+                  few days.
                 </p>
               </div>
 
@@ -1462,17 +1598,51 @@ export default function OnboardingClient({
             </p>
           )}
 
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={goBack} disabled={step === 0}>
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back
-            </Button>
-
-            {step === STEPS.length - 1 ? (
-              <Button onClick={finishOnboarding} size="lg">
-                <Rocket className="w-4 h-4 mr-2" />
-                Publish My Profile
+          {step === STEPS.length - 1 ? (
+            // ── Launch step: two clearly distinct exits ──
+            // Primary CTA = "Publish my profile now" (fast/Quick Verify path).
+            // Secondary text link = "Build the full 5-pillar profile" (slow
+            // path, routes into references collection without publishing).
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={goBack}
+                  disabled={publishing}
+                  className="shrink-0"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                </Button>
+                <Button
+                  onClick={publishProfile}
+                  size="lg"
+                  disabled={publishing}
+                  className="flex-1"
+                >
+                  {publishing ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Rocket className="w-4 h-4 mr-2" />
+                  )}
+                  {publishing ? "Publishing..." : "Publish my profile now"}
+                </Button>
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={startSlowPath}
+                  disabled={publishing}
+                  className="text-xs text-muted-foreground hover:text-primary underline underline-offset-2 transition-colors disabled:opacity-50"
+                >
+                  Or build the full 5-pillar profile (references + vouches)
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <Button variant="ghost" onClick={goBack} disabled={step === 0}>
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back
               </Button>
-            ) : (
               <Button onClick={goNext}>
                 {step === 0
                   ? "Get Started"
@@ -1483,8 +1653,8 @@ export default function OnboardingClient({
                     : "Continue"}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
