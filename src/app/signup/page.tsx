@@ -78,8 +78,12 @@ function SignupForm() {
       toast.success("Account created!", {
         description: "Check your email for a confirmation link.",
       });
-      router.push("/login");
+      router.push("/login?from=signup_pending");
     } else {
+      // Fire-and-forget welcome email — never block onboarding redirect.
+      void fetch("/api/auth/welcome", { method: "POST" }).catch(() => {
+        // Best-effort: failures are logged server-side.
+      });
       toast.success("Welcome! Let's set up your profile.");
       router.push("/onboarding");
     }

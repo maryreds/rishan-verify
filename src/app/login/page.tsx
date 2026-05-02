@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,16 @@ import {
 import { toast } from "sonner";
 import { VouchLogo } from "@/components/vouch/vouch-logo";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const showSignupPendingBanner =
+    searchParams.get("from") === "signup_pending";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,6 +69,12 @@ export default function LoginPage() {
             <VouchLogo size="lg" href="/" />
           </div>
 
+          {showSignupPendingBanner && (
+            <div className="mb-4 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary">
+              Almost there — check your inbox to confirm your email, then sign in below.
+            </div>
+          )}
+
           <Card>
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Log in to Vouch</CardTitle>
@@ -84,7 +94,15 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs font-medium text-primary hover:underline"
+                    >
+                      Forgot?
+                    </Link>
+                  </div>
                   <Input
                     id="password"
                     type="password"
@@ -109,5 +127,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
