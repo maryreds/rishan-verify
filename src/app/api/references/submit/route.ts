@@ -1,23 +1,34 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
+// Public endpoint hit by referees from a tokenized email link. We validate
+// the token here in app code, then write with the service-role client so the
+// references_token_submit RLS policy can be tightened without breaking
+// submission. Tokens are generated server-side with crypto.randomUUID() at
+// request creation time and are unguessable.
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
     const body = await request.json();
     const { token, responses } = body;
 
-    if (!token || !responses) {
+    if (!token || typeof token !== "string") {
       return NextResponse.json(
-        { error: "Token and responses are required" },
+        { error: "Token is required" },
+        { status: 400 }
+      );
+    }
+    if (!responses || typeof responses !== "object") {
+      return NextResponse.json(
+        { error: "Responses are required" },
         { status: 400 }
       );
     }
 
-    // Look up reference by token
-    const { data: reference, error: fetchError } = await supabase
+    const admin = createAdminClient();
+
+    const { data: reference, error: fetchError } = await admin
       .from("references")
-      .select("*")
+      .select("id, status")
       .eq("token", token)
       .single();
 
@@ -35,8 +46,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update the reference with responses
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from("references")
       .update({
         responses,
@@ -44,6 +54,7 @@ export async function POST(request: Request) {
         submitted_at: new Date().toISOString(),
       })
       .eq("id", reference.id)
+      .eq("status", "pending")
       .select()
       .single();
 

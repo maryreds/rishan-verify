@@ -129,16 +129,13 @@ CREATE POLICY vouches_delete ON peer_vouches
 
 -- ── references (token_submit hardening) ─────────────────────────────────────
 -- Original `references_token_submit FOR UPDATE USING (true)` lets ANY
--- authenticated user PATCH any reference row directly via PostgREST, bypassing
--- the token check that lives only in the API route. Tighten to allow updates
--- only via the API (which uses a SECURITY DEFINER pattern) by removing the
--- broad UPDATE policy. The /api/references/submit route should be refactored
--- to call a SECURITY DEFINER function `submit_reference(token, responses)`
--- that validates the token server-side. For now we just block the bypass.
+-- authenticated user PATCH any reference row directly via PostgREST,
+-- bypassing the token check that lives only in the API route. The /api/
+-- references/submit route was refactored in commit f… to use the
+-- service-role admin client (validates the token in app code, then writes
+-- with elevated privs). With that in place, the broad UPDATE policy can be
+-- dropped — direct PostgREST updates from anon/auth users are blocked.
 DROP POLICY IF EXISTS references_token_submit ON "references";
--- Note: this temporarily breaks /api/references/submit until the route is
--- refactored to use service-role or a SECURITY DEFINER RPC. Apply this
--- migration AFTER refactoring api/references/submit/route.ts.
 
 -- ── communities (intentionally remains world-readable) ──────────────────────
 -- communities, community_members, community_messages are intentionally public
