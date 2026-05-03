@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -17,32 +17,41 @@ import {
 import { toast } from "sonner";
 import { VouchLogo } from "@/components/vouch/vouch-logo";
 
-function LoginForm() {
+export default function ResetPasswordPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const showSignupPendingBanner =
-    searchParams.get("from") === "signup_pending";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (password.length < 8) {
+      toast.error("Password too short", {
+        description: "Use at least 8 characters.",
+      });
+      return;
+    }
+
+    if (password !== confirm) {
+      toast.error("Passwords don't match", {
+        description: "Make sure both fields are identical.",
+      });
+      return;
+    }
+
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      toast.error("Login failed", { description: error.message });
+      toast.error("Couldn't update password", { description: error.message });
       setLoading(false);
       return;
     }
 
+    toast.success("Password updated");
     router.push("/dashboard");
     router.refresh();
   }
@@ -52,12 +61,17 @@ function LoginForm() {
       {/* Left panel — brand */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/90 to-primary items-center justify-center p-12">
         <div className="max-w-md text-primary-foreground">
-          <VouchLogo size="lg" href="/" className="text-primary-foreground [&_svg]:text-primary-foreground" />
+          <VouchLogo
+            size="lg"
+            href="/"
+            className="text-primary-foreground [&_svg]:text-primary-foreground"
+          />
           <h2 className="mt-8 text-3xl font-bold tracking-tight">
-            Welcome back
+            Set a new password
           </h2>
           <p className="mt-4 text-primary-foreground/80 text-lg">
-            Your verified profile is waiting. Log in to check your Vouch Score and see who&apos;s viewed your profile.
+            Pick something strong. We recommend a passphrase of three or more
+            words.
           </p>
         </div>
       </div>
@@ -69,71 +83,55 @@ function LoginForm() {
             <VouchLogo size="lg" href="/" />
           </div>
 
-          {showSignupPendingBanner && (
-            <div className="mb-4 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary">
-              Almost there — check your inbox to confirm your email, then sign in below.
-            </div>
-          )}
-
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Log in to Vouch</CardTitle>
-              <CardDescription>Access your verified profile</CardDescription>
+              <CardTitle className="text-2xl">New password</CardTitle>
+              <CardDescription>
+                Enter your new password below.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      Forgot?
-                    </Link>
-                  </div>
+                  <Label htmlFor="password">New password</Label>
                   <Input
                     id="password"
                     type="password"
                     required
+                    minLength={8}
+                    placeholder="At least 8 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm">Confirm password</Label>
+                  <Input
+                    id="confirm"
+                    type="password"
+                    required
+                    minLength={8}
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                  />
+                </div>
                 <Button className="w-full" type="submit" disabled={loading}>
-                  {loading ? "Logging in..." : "Log In"}
+                  {loading ? "Updating..." : "Update password"}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link className="font-medium text-primary hover:underline" href="/signup">
-              Get Vouch Verified
+            <Link
+              className="font-medium text-primary hover:underline"
+              href="/login"
+            >
+              Back to log in
             </Link>
           </p>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
   );
 }
