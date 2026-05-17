@@ -37,7 +37,8 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes that are excluded from protection (nested under otherwise-protected prefixes)
-  const publicRoutes = ["/reference", "/employer/marketplace", "/employer/candidate", "/demo", "/preview-badge"];
+  // /admin/visitors uses its own password gate (mermelada), not Supabase auth
+  const publicRoutes = ["/reference", "/employer/marketplace", "/employer/candidate", "/demo", "/preview-badge", "/admin/visitors"];
   const isPublicRoute = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
