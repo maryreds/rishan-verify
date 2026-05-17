@@ -7,8 +7,9 @@ import {
   Loader2,
   Check,
   X,
-  Search,
   User,
+  Mail,
+  Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,10 +23,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 interface Profile {
   id: string;
@@ -52,26 +59,34 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: "text-red-600 border-red-300 bg-red-50",
 };
 
-export default function VouchManagerClient({
-  userId,
-}: {
-  userId: string;
-}) {
+const RELATIONSHIPS = [
+  { value: "manager", label: "Manager" },
+  { value: "colleague", label: "Colleague" },
+  { value: "report", label: "Direct Report" },
+  { value: "client", label: "Client" },
+];
+
+export default function VouchManagerClient({}: { userId: string }) {
   const [received, setReceived] = useState<Vouch[]>([]);
   const [given, setGiven] = useState<Vouch[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
-  // Vouch form state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Profile[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState<Profile | null>(
-    null
-  );
-  const [skill, setSkill] = useState("");
-  const [message, setMessage] = useState("");
+  // Vouch-for-someone dialog (email-based)
+  const [giveOpen, setGiveOpen] = useState(false);
+  const [giveSubmitting, setGiveSubmitting] = useState(false);
+  const [giveName, setGiveName] = useState("");
+  const [giveEmail, setGiveEmail] = useState("");
+  const [giveSkill, setGiveSkill] = useState("");
+  const [giveMessage, setGiveMessage] = useState("");
+
+  // Request-vouch dialog (asks someone to vouch for you)
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const [reqName, setReqName] = useState("");
+  const [reqEmail, setReqEmail] = useState("");
+  const [reqTitle, setReqTitle] = useState("");
+  const [reqCompany, setReqCompany] = useState("");
+  const [reqRelationship, setReqRelationship] = useState("");
 
   const fetchVouches = useCallback(async () => {
     try {
@@ -91,70 +106,43 @@ export default function VouchManagerClient({
     fetchVouches();
   }, [fetchVouches]);
 
-  // Search for candidates by name
-  useEffect(() => {
-    if (searchQuery.length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
-    const timeout = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const res = await fetch(
-          `/api/vouches/list?search=${encodeURIComponent(searchQuery)}`
-        );
-        // Use a simple Supabase query via a dedicated search
-        const { createClient } = await import("@/lib/supabase");
-        const supabase = createClient();
-        const { data } = await supabase
-          .from("profiles")
-          .select("id, full_name, photo_original_url")
-          .ilike("full_name", `%${searchQuery}%`)
-          .neq("id", userId)
-          .limit(5);
-        setSearchResults(data || []);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [searchQuery, userId]);
-
-  function resetForm() {
-    setSearchQuery("");
-    setSearchResults([]);
-    setSelectedCandidate(null);
-    setSkill("");
-    setMessage("");
+  function resetGiveForm() {
+    setGiveName("");
+    setGiveEmail("");
+    setGiveSkill("");
+    setGiveMessage("");
   }
 
-  async function handleVouch(e: React.FormEvent) {
+  function resetRequestForm() {
+    setReqName("");
+    setReqEmail("");
+    setReqTitle("");
+    setReqCompany("");
+    setReqRelationship("");
+  }
+
+  async function handleGive(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!selectedCandidate) {
-      toast.error("Please select a candidate");
+    if (!giveEmail.trim() || !giveName.trim()) {
+      toast.error("Name and email are required");
       return;
     }
-
-    if (!skill.trim()) {
+    if (!giveSkill.trim()) {
       toast.error("Please enter a skill");
       return;
     }
 
-    setSubmitting(true);
-
+    setGiveSubmitting(true);
     try {
       const res = await fetch("/api/vouches/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          voucheeId: selectedCandidate.id,
-          skill: skill.trim(),
-          message: message.trim() || null,
+          voucheeEmail: giveEmail.trim(),
+          voucheeName: giveName.trim(),
+          skill: giveSkill.trim(),
+          message: giveMessage.trim() || null,
         }),
       });
 
@@ -164,17 +152,58 @@ export default function VouchManagerClient({
       }
 
       toast.success("Vouch sent!", {
-        description: `You vouched for ${selectedCandidate.full_name}`,
+        description: `An email with your vouch has been sent to ${giveName}`,
       });
-      setDialogOpen(false);
-      resetForm();
+      setGiveOpen(false);
+      resetGiveForm();
       fetchVouches();
     } catch (err) {
       toast.error("Failed to send vouch", {
         description: err instanceof Error ? err.message : "Please try again",
       });
     } finally {
-      setSubmitting(false);
+      setGiveSubmitting(false);
+    }
+  }
+
+  async function handleRequest(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!reqName.trim() || !reqEmail.trim()) {
+      toast.error("Name and email are required");
+      return;
+    }
+
+    setRequestSubmitting(true);
+    try {
+      const res = await fetch("/api/references/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: reqName.trim(),
+          email: reqEmail.trim(),
+          title: reqTitle.trim() || null,
+          company: reqCompany.trim() || null,
+          relationship: reqRelationship || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to request vouch");
+      }
+
+      toast.success("Vouch request sent!", {
+        description: `We emailed ${reqName} to vouch for you`,
+      });
+      setRequestOpen(false);
+      resetRequestForm();
+    } catch (err) {
+      toast.error("Failed to send request", {
+        description: err instanceof Error ? err.message : "Please try again",
+      });
+    } finally {
+      setRequestSubmitting(false);
     }
   }
 
@@ -210,17 +239,23 @@ export default function VouchManagerClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Peer Vouches</h1>
           <p className="text-muted-foreground">
             Vouch for peers and receive endorsements
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Vouch for Someone
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setRequestOpen(true)}>
+            <Mail className="w-4 h-4 mr-2" />
+            Request Vouch
+          </Button>
+          <Button onClick={() => setGiveOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Vouch for Someone
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="received">
@@ -239,10 +274,14 @@ export default function VouchManagerClient({
                 <h3 className="text-lg font-semibold text-foreground mb-1">
                   No vouches received yet
                 </h3>
-                <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                  When verified professionals vouch for your skills, they will
-                  appear here.
+                <p className="text-muted-foreground text-sm max-w-md mx-auto mb-4">
+                  Ask a colleague or manager to vouch for your skills — we&rsquo;ll
+                  email them a quick form to fill out.
                 </p>
+                <Button onClick={() => setRequestOpen(true)} variant="outline">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Request Your First Vouch
+                </Button>
               </CardContent>
             </Card>
           ) : (
@@ -328,10 +367,7 @@ export default function VouchManagerClient({
                 <p className="text-muted-foreground text-sm max-w-md mx-auto mb-4">
                   Vouch for colleagues and peers to help them stand out.
                 </p>
-                <Button
-                  onClick={() => setDialogOpen(true)}
-                  variant="outline"
-                >
+                <Button onClick={() => setGiveOpen(true)} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   Vouch for Someone
                 </Button>
@@ -386,105 +422,61 @@ export default function VouchManagerClient({
         </TabsContent>
       </Tabs>
 
+      {/* Vouch for Someone — email-based */}
       <Dialog
-        open={dialogOpen}
+        open={giveOpen}
         onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) resetForm();
+          setGiveOpen(open);
+          if (!open) resetGiveForm();
         }}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Vouch for Someone</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Enter their email and we&rsquo;ll send them your vouch directly.
+            </p>
           </DialogHeader>
-          <form onSubmit={handleVouch} className="space-y-4">
+          <form onSubmit={handleGive} className="space-y-4">
             <div className="space-y-2">
-              <Label>Find a Candidate</Label>
-              {selectedCandidate ? (
-                <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/50">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium text-sm">
-                    {selectedCandidate.full_name}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="ml-auto h-6 w-6 p-0"
-                    onClick={() => {
-                      setSelectedCandidate(null);
-                      setSearchQuery("");
-                    }}
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                  {(searchResults.length > 0 || searching) && (
-                    <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-popover border rounded-lg shadow-lg overflow-hidden">
-                      {searching ? (
-                        <div className="p-3 text-center text-sm text-muted-foreground">
-                          <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
-                          Searching...
-                        </div>
-                      ) : (
-                        searchResults.map((profile) => (
-                          <button
-                            key={profile.id}
-                            type="button"
-                            className="w-full flex items-center gap-2 p-3 text-left hover:bg-muted transition-colors text-sm"
-                            onClick={() => {
-                              setSelectedCandidate(profile);
-                              setSearchQuery("");
-                              setSearchResults([]);
-                            }}
-                          >
-                            {profile.photo_original_url ? (
-                              <img
-                                src={profile.photo_original_url}
-                                alt={profile.full_name}
-                                className="w-6 h-6 rounded-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                                <User className="w-3 h-3 text-muted-foreground" />
-                              </div>
-                            )}
-                            {profile.full_name}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="vouch-skill">Skill</Label>
+              <Label htmlFor="give-name">Full Name</Label>
               <Input
-                id="vouch-skill"
+                id="give-name"
                 required
-                placeholder="e.g. React, Leadership, System Design"
-                value={skill}
-                onChange={(e) => setSkill(e.target.value)}
+                placeholder="Jane Smith"
+                value={giveName}
+                onChange={(e) => setGiveName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="vouch-message">Message (optional)</Label>
+              <Label htmlFor="give-email">Email</Label>
+              <Input
+                id="give-email"
+                type="email"
+                required
+                placeholder="jane@company.com"
+                value={giveEmail}
+                onChange={(e) => setGiveEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="give-skill">Skill you&rsquo;re vouching for</Label>
+              <Input
+                id="give-skill"
+                required
+                placeholder="e.g. React, Leadership, System Design"
+                value={giveSkill}
+                onChange={(e) => setGiveSkill(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="give-message">Message (optional)</Label>
               <Textarea
-                id="vouch-message"
+                id="give-message"
                 placeholder="Why are you vouching for this person?"
                 rows={3}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                value={giveMessage}
+                onChange={(e) => setGiveMessage(e.target.value)}
               />
             </div>
             <DialogFooter>
@@ -492,20 +484,122 @@ export default function VouchManagerClient({
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setDialogOpen(false);
-                  resetForm();
+                  setGiveOpen(false);
+                  resetGiveForm();
                 }}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting || !selectedCandidate}>
-                {submitting ? (
+              <Button type="submit" disabled={giveSubmitting}>
+                {giveSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     Sending...
                   </>
                 ) : (
-                  "Send Vouch"
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Vouch
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Request Vouch — ask someone to vouch for you */}
+      <Dialog
+        open={requestOpen}
+        onOpenChange={(open) => {
+          setRequestOpen(open);
+          if (!open) resetRequestForm();
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request a Vouch</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              We&rsquo;ll email them a short form asking for a few words and their role.
+            </p>
+          </DialogHeader>
+          <form onSubmit={handleRequest} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="req-name">Full Name</Label>
+              <Input
+                id="req-name"
+                required
+                placeholder="Jane Smith"
+                value={reqName}
+                onChange={(e) => setReqName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="req-email">Email</Label>
+              <Input
+                id="req-email"
+                type="email"
+                required
+                placeholder="jane@company.com"
+                value={reqEmail}
+                onChange={(e) => setReqEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="req-title">Job Title</Label>
+              <Input
+                id="req-title"
+                placeholder="Engineering Manager"
+                value={reqTitle}
+                onChange={(e) => setReqTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="req-company">Company</Label>
+              <Input
+                id="req-company"
+                placeholder="Acme Inc."
+                value={reqCompany}
+                onChange={(e) => setReqCompany(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Relationship</Label>
+              <Select value={reqRelationship} onValueChange={setReqRelationship}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select relationship" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RELATIONSHIPS.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setRequestOpen(false);
+                  resetRequestForm();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={requestSubmitting}>
+                {requestSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send Request
+                  </>
                 )}
               </Button>
             </DialogFooter>

@@ -10,6 +10,7 @@ const navItems = [
   { href: "/dashboard/profile", label: "Profile", icon: "person" },
   { href: "/dashboard/resume", label: "Resume", icon: "description" },
   { href: "/dashboard/verify", label: "Verify", icon: "verified" },
+  { href: "/dashboard/vouches", label: "Vouches", icon: "recommend" },
   { href: "/dashboard/assessments", label: "Assessments", icon: "assignment" },
   { href: "/dashboard/portfolio", label: "Portfolio", icon: "grid_view" },
   { href: "/dashboard/coach", label: "AI Coach", icon: "psychology" },
